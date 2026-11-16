@@ -1,0 +1,30 @@
+{
+  "model": "gpt-image-2.5-flare",
+  "assets": [
+    {
+      "name": "seal",
+      "size": "1024x1024",
+      "background": "transparent",
+      "quality": "medium",
+      "max_width": 640,
+      "prompt": "A circular state broadcast emblem seen straight on: a stylized heraldic eagle with spread wings above a laurel wreath, inside a double ring with small notches, made of brushed cold silver-white metal with soft pale-blue rim light, embossed relief, perfectly symmetrical, authoritarian and ceremonial in mood. Original design. Isolated on a fully transparent background. No text, no letters, no numbers, no characters."
+    },
+    {
+      "name": "parachute",
+      "size": "1024x1536",
+      "background": "transparent",
+      "quality": "medium",
+      "max_width": 260,
+      "prompt": "A small silver gift parachute floating down at night: a glossy metallic silver dome canopy with visible segments, thin taut cords, carrying a small round brushed-metal canister below, seen from slightly below and to the side, soft cold blue rim light and a faint warm highlight on the canister. Cinematic, realistic. Isolated on a fully transparent background. No text, no letters, no numbers, no characters, no hands."
+    },
+    {
+      "name": "forest",
+      "size": "1536x1024",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 1600,
+      "trim": false,
+      "prompt": "Cinematic matte painting of a forest at night seen from a low angle: a dense treeline of tall dark pines and broadleaf trees along the bottom third, cold blue mist drifting between the trunks, faint moonlight from behind, a few tiny fireflies. The upper two thirds are a deep navy night sky with sparse soft stars, fading to almost black at the very top. Muted, desaturated blue-green palette. No characters, no animals, no text, no letters."
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "updated": "2026-11-15",
-  "build": "5ac5502c3a",
+  "build": "5f80072ae3",
   "sync": {
     "repo": "dstratonov1234/watch-list",
     "branch": "state",
@@ -70,6 +70,57 @@
         "js": true
       },
       "episodes": true,
+      "quiz": true
+    },
+    {
+      "id": "the-hunger-games",
+      "title": "Голодные игры",
+      "original": "The Hunger Games",
+      "aliases": [
+        "The Hunger Games (2012)",
+        "Hunger Games",
+        "Голодные игры 1",
+        "Голодные игры (2012)"
+      ],
+      "type": "film",
+      "added": "2026-11-15",
+      "cover": "https://image.tmdb.org/t/p/w780/5QrQfsH4y7KHDYt9oaVGFtGb2Vm.jpg",
+      "hero": "https://image.tmdb.org/t/p/w1280/eVYChqJavS1DCXFeJE2lzVUMLKp.jpg",
+      "logo": "https://image.tmdb.org/t/p/original/ame4aKhVLoOjKpKJRA50kT0bs5c.png",
+      "images": {
+        "backdrop": "https://image.tmdb.org/t/p/original/yPTaBk27tUbb0TwnwY6uzlP7qQ4.jpg",
+        "tribute": "https://image.tmdb.org/t/p/w1280/naAzBAwNfVAiRwlmuZUnmJIokg7.jpg"
+      },
+      "parts": [
+        {
+          "id": "film",
+          "title": "Фильм",
+          "unit": "film",
+          "count": 1
+        }
+      ],
+      "theme": {
+        "bg": "#060a12",
+        "surface": "#0d1522",
+        "text": "#e9f3f8",
+        "accent": "#7fd6f0",
+        "accent2": "#f0a63a",
+        "fonts": [
+          "Jura:wght@300;400;500;600;700",
+          "Jost:wght@300;400;500;600;700"
+        ],
+        "displayFont": "Jura",
+        "headingFont": "Jura",
+        "bodyFont": "Jost",
+        "bodySize": 16,
+        "headingWeight": 600,
+        "headingCase": "uppercase",
+        "headingSpacing": "0.16em",
+        "radius": 0,
+        "heroPosition": "center 37%",
+        "css": true,
+        "js": true
+      },
       "quiz": true
     }
   ]
