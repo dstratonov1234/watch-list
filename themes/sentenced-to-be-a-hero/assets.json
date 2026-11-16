@@ -14,7 +14,7 @@
       "size": "1024x1024",
       "background": "transparent",
       "quality": "medium",
-      "max_width": 720,
+      "max_width": 1024,
       "prompt": "A circular magic sacred seal sigil seen straight on: a wide ring made of flame-shaped calligraphic brush strokes, like burning abstract runes arranged around a circle, in glowing orange with golden-white hot cores, two thin concentric guide circles, small flame tongues licking outward, the center left completely empty. Anime fantasy VFX element. Isolated on a fully transparent background. The glyphs are abstract flame shapes only. No text, no letters, no numbers, no characters."
     },
     {
@@ -22,8 +22,8 @@
       "size": "1024x1024",
       "background": "transparent",
       "quality": "medium",
-      "max_width": 420,
-      "prompt": "A rough round ink stamp impression in deep blood red, seen straight on: thick outer ring and thin inner ring with uneven, patchy, slightly smudged ink, a wide empty band between the rings, and a small simple stylized flame emblem in the exact center. Distressed rubber stamp look with missing flecks of ink. Isolated on a fully transparent background. No text, no letters, no numbers, no characters."
+      "max_width": 360,
+      "prompt": "A rough round ink stamp impression in deep blood red, seen straight on: a thick outer ring and a thin inner ring with uneven, patchy, slightly smudged ink and small missing flecks, a wide empty band between the two rings, and a completely empty centre inside the inner ring (nothing drawn there). Distressed rubber stamp look. Isolated on a fully transparent background. No emblem, no symbol, no text, no letters, no numbers, no characters."
     },
     {
       "name": "paper",

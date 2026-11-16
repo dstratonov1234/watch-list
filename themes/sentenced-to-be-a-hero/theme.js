@@ -5,12 +5,13 @@
   "use strict";
 
   const ID = "sentenced-to-be-a-hero";
-  const LETTERS = "АБВГДЕЖЗИКЛМ";
   const SEEN_KEY = "sh-intro"; // заставка в этой вкладке уже игралась — повторно играть короче
+  const DRAFT_KEY = "sh-draft"; // незаконченное заседание трибунала (ответы до приговора)
   const BANDS = 8;
 
   const isUrl = (u) => typeof u === "string" && /^https?:\/\//i.test(u);
   const pad = (n) => String(n).padStart(2, "0");
+  const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
 
   const session = {
     get(k) {
@@ -22,12 +23,16 @@
     },
     set(k, v) {
       try {
-        sessionStorage.setItem(k, v);
+        if (v == null) sessionStorage.removeItem(k);
+        else sessionStorage.setItem(k, v);
       } catch {
-        /* без памяти вкладки заставка просто всегда полная */
+        /* без памяти вкладки заставка просто всегда полная, а черновик живёт до ухода со страницы */
       }
     },
   };
+
+  // Каким вышел приговор: от 7,5 — печать богини (пламя и золото), от 6 — золотой штамп, ниже — кровавый.
+  const tier = (score) => (score >= 7.5 ? "hi" : score >= 6 ? "mid" : "lo");
 
   // Зарубки на стене камеры: по одной на приказ, пятая перечёркивает четыре.
   function tallyHtml(done, total) {
@@ -46,7 +51,7 @@
     return `<span class="sh-tally" aria-hidden="true">${out}</span>`;
   }
 
-  // «Наказание: прикрыть отступление…» → вид приказа и его суть (если в названии серии есть двоеточие).
+  // «Наказание: оборона крепости…» → вид приказа и его суть (если в названии серии есть двоеточие).
   function splitOrder(title) {
     const i = title.indexOf(":");
     if (i > 0 && i < 40 && i < title.length - 1) {
@@ -56,15 +61,26 @@
     return ["", title];
   }
 
-  // Слой заставки: полосы-разрезы и название в двойной золотой рамке.
+  // Слой заставки: полосы-разрезы, под названием — арт дела, само название в двойной золотой рамке.
   function cutHtml(item, esc) {
     const bands = Array.from({ length: BANDS }, (_, i) => {
       const fromCentre = Math.floor(Math.abs(i - (BANDS - 1) / 2));
-      return `<i class="sh-cut-band" style="--i:${i};--j:${fromCentre};--dir:${i % 2 ? "101%" : "-101%"}"></i>`;
+      return `<i class="sh-cut-band" style="--i:${i};--j:${fromCentre};--dir:${i % 2 ? "88%" : "-88%"}"></i>`;
     }).join("");
+    const art = isUrl(item.images?.dossier) ? `<div class="sh-cut-art"><img src="${esc(item.images.dossier)}" alt=""></div>` : "";
     const logo = isUrl(item.logo) ? `<img src="${esc(item.logo)}" alt="">` : "";
-    return `<div class="sh-cut-rot">${bands}</div>
+    return `<div class="sh-cut-rot">${bands}</div>${art}
       <div class="sh-cut-title"><span class="sh-cut-frame">${logo}<b>${esc(item.title)}</b></span></div>`;
+  }
+
+  // Арт под названием проявляется, только когда картинка готова, — иначе он «вспыхнет» посреди заставки.
+  function armArt(layer) {
+    const img = layer.querySelector(".sh-cut-art img");
+    if (!img) return;
+    (img.decode ? img.decode() : Promise.resolve()).then(
+      () => layer.classList.add("art"),
+      () => {},
+    );
   }
 
   const stageLayer = () => document.querySelector(`.stage-layer[data-title="${ID}"]`);
@@ -85,14 +101,12 @@
       const { progress: p, esc } = b;
       const label = b.plural(p.watched, "приказ исполнен", "приказа исполнено", "приказов исполнено");
       const art = b.art.hero('alt="" decoding="async"');
-      const seal =
-        b.score != null
-          ? `<span class="sh-b-seal has" role="img" aria-label="Приговор: ${b.fmtScore(b.score)} из 10"><b>${b.fmtScore(b.score)}</b></span>`
-          : p.status === "completed"
-            ? `<span class="sh-b-seal" aria-hidden="true"></span>`
-            : "";
+      const judged = b.score != null;
+      const seal = judged
+        ? `<span class="sh-b-seal ${tier(b.score)}" role="img" aria-label="Приговор: ${b.fmtScore(b.score)} из 10"><b>${b.fmtScore(b.score)}</b></span>`
+        : "";
       b.el.innerHTML = `
-        <span class="sh-b">
+        <span class="sh-b ${judged ? "judged" : ""}">
           <span class="sh-b-fire" aria-hidden="true"></span>
           <span class="sh-b-shard sh-b-a">${art}
             <span class="sh-b-id">${b.art.logo('class="sh-b-logo" alt=""')}<span class="sh-b-name">${esc(b.item.title)}</span></span>
@@ -126,6 +140,8 @@
         swords += `<i class="sh-st-sw" style="--cx:${cx.toFixed(4)};--cy:${cy.toFixed(4)};--r:${r.toFixed(1)}deg;--i:${i}"><b></b></i>`;
       }
       s.el.innerHTML = `<div class="sh-st-ground"></div><div class="sh-st-seal"></div>${swords}`;
+      // арт для заставки — заранее, пока курсор ещё на баннере
+      if (isUrl(s.item.images?.dossier)) new Image().src = s.item.images.dossier;
     },
 
     // ---------------------------------------------------------- заставка ---
@@ -134,8 +150,9 @@
       const layer = t.layer("sh-cut");
       layer.innerHTML = cutHtml(t.item, t.esc);
       t.data.started = performance.now();
-      const img = layer.querySelector("img");
+      const img = layer.querySelector(".sh-cut-frame img");
       const decoded = img?.decode ? Promise.race([img.decode().catch(() => {}), t.wait(300)]) : Promise.resolve();
+      armArt(layer);
       void layer.offsetWidth; // стартовое положение применить до смены класса
       layer.classList.add("closing");
       // экран закрыт, когда раскрылась последняя полоса (44 мс × 7 + 110 + 360)
@@ -155,6 +172,10 @@
         }, ms);
         timers.add(id);
         return id;
+      };
+      const cancel = (id) => {
+        clearTimeout(id);
+        timers.delete(id);
       };
       ctx.onCleanup(() => {
         timers.forEach(clearTimeout);
@@ -192,7 +213,7 @@
             .join("");
           return `
             <section class="sh-part" data-part="${esc(part.id)}">
-              <h2 class="sh-part-head"><span>${esc(part.title || "Приказы")}</span>${all.length > 1 || part.title ? `<small>приказы</small>` : ""}<i data-count></i></h2>
+              <h2 class="sh-part-head"><span>${esc(part.title || "Приказы")}</span><small>штрафной отряд 9004 · приказы</small>${all.length > 1 ? `<i data-count></i>` : ""}</h2>
               <ol class="sh-orders" data-gallery>${orders}</ol>
             </section>`;
         })
@@ -221,16 +242,36 @@
             </div>
             <section class="sh-served" aria-label="Прогресс"></section>
             <section class="sh-verdict" aria-label="Приговор"></section>
+            <p class="sr-only" aria-live="polite" data-say></p>
           </aside>
           <div class="sh-ledger">${partsHtml}${neigh}</div>
         </div>
         <dialog class="sh-trib" aria-label="Трибунал"></dialog>`;
 
       const page = root.querySelector(".sh-page");
+      const dossierEl = root.querySelector(".sh-dossier");
       const served = root.querySelector(".sh-served");
       const verdict = root.querySelector(".sh-verdict");
+      const say = root.querySelector("[data-say]");
       const dlg = root.querySelector(".sh-trib");
       const orderEls = [...root.querySelectorAll(".sh-order")];
+
+      // --- трибунал: состояние заседания (нужно и блоку приговора) ---
+      const trib = { answers: {}, i: 0, done: false, draft: false };
+      try {
+        const d = JSON.parse(session.get(DRAFT_KEY) ?? "null");
+        if (d && d.id === item.id && d.a && typeof d.a === "object") Object.assign(trib, { answers: d.a, i: Number(d.i) || 0, draft: true });
+      } catch {
+        /* битый черновик — просто начнём заново */
+      }
+      const saveDraft = () => {
+        trib.draft = true;
+        session.set(DRAFT_KEY, JSON.stringify({ id: item.id, a: trib.answers, i: trib.i }));
+      };
+      const dropDraft = () => {
+        trib.draft = false;
+        session.set(DRAFT_KEY, null);
+      };
 
       // --- счёт приказов ---
       function renderServed() {
@@ -238,7 +279,7 @@
         const label = ctx.plural(p.watched, "приказ исполнен", "приказа исполнено", "приказов исполнено");
         const many = p.parts.length > 1;
         const where = p.last ? `Последний исполненный — <b>${many && p.last.part.title ? `${esc(p.last.part.title)}, ` : ""}приказ № ${p.last.n}</b>` : "Ни один приказ ещё не исполнен";
-        const nextBtn = edit && p.next ? `<button type="button" class="sh-btn" data-act="next">Отметить приказ № ${p.next.n}</button>` : "";
+        const nextBtn = edit && p.next ? `<button type="button" class="sh-btn" data-act="next">Исполнить приказ № ${p.next.n}</button>` : "";
         served.innerHTML = `
           <div class="sh-served-num"><b>${p.watched}</b><span>/ ${p.total}</span></div>
           <div class="sh-served-label">${label}</div>
@@ -251,21 +292,23 @@
       function renderVerdict() {
         const p = ctx.progress();
         const st = ctx.quizState();
+        const judged = !!st && st.score != null;
+        dossierEl.classList.toggle("judged", judged);
         if (!quiz?.questions?.length) return void (verdict.innerHTML = "");
-        if (st && st.score != null) {
+        if (judged) {
           verdict.innerHTML = `
-            <div class="sh-seal" role="img" aria-label="Оценка ${ctx.fmtScore(st.score)} из 10"><b>${ctx.fmtScore(st.score)}</b></div>
+            <div class="sh-seal ${tier(st.score)}" role="img" aria-label="Оценка ${ctx.fmtScore(st.score)} из 10"><b>${ctx.fmtScore(st.score)}</b></div>
             <div class="sh-verdict-kicker">Приговор трибунала</div>
             <div class="sh-verdict-label">${esc(st.verdict?.label ?? "Вынесен")}</div>
             <div class="sh-verdict-text">${esc(st.verdict?.text ?? "")}</div>
-            ${edit && p.status === "completed" ? `<button type="button" class="sh-btn line" data-act="tribunal">Пересмотреть дело</button>` : ""}`;
+            ${edit && p.status === "completed" ? `<button type="button" class="sh-btn line" data-act="tribunal">${trib.draft ? "Продолжить заседание" : "Обжаловать приговор"}</button>` : ""}`;
         } else if (p.status === "completed" && edit) {
           verdict.innerHTML = `
             <div class="sh-seal wait" aria-hidden="true"></div>
             <div class="sh-verdict-kicker">Все приказы исполнены</div>
             <div class="sh-verdict-label">Дело ждёт приговора</div>
             <div class="sh-verdict-text">${quiz.questions.length} ${ctx.plural(quiz.questions.length, "вопрос", "вопроса", "вопросов")} — и оценка от 0 до 10.</div>
-            <button type="button" class="sh-btn fire" data-act="tribunal">Созвать трибунал</button>`;
+            <button type="button" class="sh-btn fire" data-act="tribunal">${trib.draft ? "Продолжить заседание" : "Созвать трибунал"}</button>`;
         } else if (p.status !== "completed") {
           verdict.innerHTML = `
             <div class="sh-seal wait" aria-hidden="true"></div>
@@ -280,6 +323,30 @@
 
       // --- печати на приказах ---
       let known = null; // что было отмечено при прошлой отрисовке: «часть:номер»
+      // Возврат назад снимает сразу несколько печатей — такой клик сначала только «взводится» и ждёт второго.
+      let armed = null; // { part, n, timer }
+
+      function showArmed() {
+        const cur = armed ? (ctx.progress().parts.find((x) => x.id === armed.part)?.watched ?? 0) : 0;
+        for (const el of orderEls) {
+          const n = Number(el.dataset.n);
+          const mine = !!armed && el.dataset.part === armed.part;
+          el.classList.toggle("armed", mine && n === armed.n);
+          el.classList.toggle("doomed", mine && n > armed.n && n <= cur);
+          if (mine && n === armed.n) {
+            const drop = cur - armed.n;
+            el.querySelector(".sh-do").textContent = `снять ${drop} ${ctx.plural(drop, "печать", "печати", "печатей")}?`;
+          }
+        }
+      }
+
+      function disarm() {
+        if (!armed) return;
+        cancel(armed.timer);
+        armed = null;
+        renderOrders(false);
+      }
+
       function renderOrders(animate) {
         const p = ctx.progress();
         const watched = new Map(p.parts.map((x) => [x.id, x.watched]));
@@ -288,7 +355,8 @@
         for (const el of orderEls) {
           const part = el.dataset.part;
           const n = Number(el.dataset.n);
-          const seen = n <= (watched.get(part) ?? 0);
+          const cur = watched.get(part) ?? 0;
+          const seen = n <= cur;
           const isNext = !!p.next && p.next.part.id === part && p.next.n === n;
           if (seen) seenNow.add(`${part}:${n}`);
           if (seen && known && !known.has(`${part}:${n}`)) fresh.push(el);
@@ -296,12 +364,13 @@
           el.classList.toggle("next", isNext);
           if (!seen) el.classList.remove("just");
           const btn = el.querySelector(".sh-stamp");
-          const todo = el.querySelector(".sh-do");
-          todo.textContent = seen ? "" : isNext ? (edit ? "исполнить" : "следующий") : edit ? "отметить" : "";
+          el.querySelector(".sh-do").textContent = seen ? "" : isNext ? (edit ? "исполнить" : "следующий") : edit ? `по № ${n}` : "";
           if (btn.tagName === "BUTTON") {
             btn.setAttribute("aria-pressed", String(seen));
-            const cur = watched.get(part) ?? 0;
-            btn.setAttribute("aria-label", n === cur ? `Приказ ${n} исполнен. Снять с него отметку` : seen ? `Приказ ${n} исполнен. Вернуться: остановился на нём` : `Отметить: остановился на приказе ${n}`);
+            btn.setAttribute(
+              "aria-label",
+              n === cur ? `Приказ ${n} исполнен. Снять с него печать` : seen ? `Приказ ${n} исполнен. Вернуться: остановился на нём` : `Отметить: остановился на приказе ${n}`,
+            );
           }
           // кадр серии открывается в полный размер только у исполненных — чтобы не ловить спойлеры
           const img = el.querySelector(".sh-still img");
@@ -309,10 +378,12 @@
         }
         for (const sec of root.querySelectorAll(".sh-part")) {
           const part = p.parts.find((x) => x.id === sec.dataset.part);
-          if (part) sec.querySelector("[data-count]").textContent = `${part.watched} / ${part.count}`;
+          const count = sec.querySelector("[data-count]");
+          if (part && count) count.textContent = `${part.watched} / ${part.count}`;
         }
         if (animate && !ctx.reducedMotion) fresh.slice(-6).forEach((el, i) => later(() => strike(el), i * 90));
         known = seenNow;
+        showArmed();
       }
 
       // Удар: клинок света падает на приказ, печать врезается, летят искры.
@@ -324,7 +395,10 @@
         const spot = el.querySelector(".sh-stamp");
         spot.insertAdjacentHTML("beforeend", `<span class="sh-strike" aria-hidden="true"></span>${burstHtml()}`);
         const fx = [...spot.querySelectorAll(".sh-strike, .sh-burst")].slice(-2);
-        later(() => fx.forEach((x) => x.remove()), 1000);
+        later(() => {
+          fx.forEach((x) => x.remove());
+          el.classList.remove("just");
+        }, 1000);
       }
 
       function renderAll(animate) {
@@ -333,16 +407,40 @@
         renderOrders(animate);
       }
       renderAll(false);
-      ctx.onChange(() => renderAll(true));
+      ctx.onChange(() => {
+        // отметка изменилась (здесь или с другого устройства) — взведённый возврат больше не актуален
+        if (armed) {
+          cancel(armed.timer);
+          armed = null;
+        }
+        renderAll(true);
+      });
 
       ctx.listen(root, "click", (e) => {
         const stamp = e.target.closest("button.sh-stamp");
         if (stamp) {
+          const part = stamp.dataset.part;
           const n = Number(stamp.dataset.n);
-          const cur = ctx.progress().parts.find((x) => x.id === stamp.dataset.part)?.watched ?? 0;
-          // печать на приказе n: остановился на нём; повторно по последнему исполненному — снять с него отметку
-          return ctx.setWatched(stamp.dataset.part, n === cur ? n - 1 : n);
+          const cur = ctx.progress().parts.find((x) => x.id === part)?.watched ?? 0;
+          if (n < cur) {
+            // возврат к приказу n снимет печати с n+1…cur: первый клик взводит, второй — подтверждает
+            if (armed && armed.part === part && armed.n === n) {
+              cancel(armed.timer);
+              armed = null;
+              return ctx.setWatched(part, n);
+            }
+            if (armed) cancel(armed.timer);
+            armed = { part, n, timer: later(disarm, 4500) };
+            renderOrders(false);
+            const drop = cur - n;
+            say.textContent = `Снять ${drop} ${ctx.plural(drop, "печать", "печати", "печатей")} и остановиться на приказе ${n}? Нажми ещё раз, чтобы подтвердить.`;
+            return;
+          }
+          disarm();
+          // печать на приказе n: остановился на нём; повторно по последнему исполненному — снять с него печать
+          return ctx.setWatched(part, n === cur ? n - 1 : n);
         }
+        disarm();
         const act = e.target.closest("[data-act]")?.dataset.act;
         if (act === "next") {
           ctx.markNext();
@@ -353,12 +451,14 @@
 
       // ---------------------------------------------------------- трибунал ---
       // Заседание: по одному вопросу на экран. Ответ на вопрос с одним вариантом сразу ведёт дальше.
-      const trib = { answers: {}, i: 0, done: false };
-
+      // Ответы — черновик: закрытое окно их не теряет, приговор выносится только по кнопке.
       function openTribunal() {
         if (!quiz?.questions?.length || !edit) return;
-        trib.answers = JSON.parse(JSON.stringify(ctx.quizState()?.answers ?? {}));
-        trib.i = 0;
+        if (!trib.draft) {
+          trib.answers = JSON.parse(JSON.stringify(ctx.quizState()?.answers ?? {}));
+          trib.i = 0;
+        }
+        trib.i = clamp(trib.i, 0, quiz.questions.length - 1);
         trib.done = false;
         renderQuestion(true);
         if (!dlg.open) dlg.showModal();
@@ -386,36 +486,36 @@
           </div>`;
         } else if (type === "multi") {
           body = `<div class="sh-opts ${(q.options ?? []).length > 6 ? "many" : ""}" role="group" aria-label="${esc(q.text)}">${(q.options ?? [])
-            .map((o, n) => `<button type="button" class="sh-opt" aria-pressed="${Array.isArray(a) && a.includes(o.id)}" data-v="${esc(o.id)}"><i>${LETTERS[n] ?? n + 1}</i><span>${esc(o.text)}</span></button>`)
+            .map((o, n) => `<button type="button" class="sh-opt" aria-pressed="${Array.isArray(a) && a.includes(o.id)}" data-v="${esc(o.id)}"><i>${n + 1}</i><span>${esc(o.text)}</span></button>`)
             .join("")}</div>`;
         } else {
           body = `<div class="sh-opts" role="radiogroup" aria-label="${esc(q.text)}">${(q.options ?? [])
-            .map((o, n) => `<button type="button" class="sh-opt" role="radio" aria-checked="${a === o.id}" data-v="${esc(o.id)}"><i>${LETTERS[n] ?? n + 1}</i><span>${esc(o.text)}</span></button>`)
+            .map((o, n) => `<button type="button" class="sh-opt" role="radio" aria-checked="${a === o.id}" data-v="${esc(o.id)}"><i>${n + 1}</i><span>${esc(o.text)}</span></button>`)
             .join("")}</div>`;
         }
         const last = trib.i === qs.length - 1;
-        const all = qs.every(answered);
         const ok = answered(q) || type === "multi";
+        const rest = qs.every((x) => x === q || answered(x));
         dlg.innerHTML = `
           <div class="sh-trib-in">
             <header class="sh-trib-head">
               <h2 class="sh-trib-title">${esc(quiz.title ?? "Трибунал")}</h2>
               <span class="sh-trib-count" aria-label="Вопрос ${trib.i + 1} из ${qs.length}"><b>${trib.i + 1}</b> / ${qs.length}</span>
-              <button type="button" class="sh-trib-x" data-t="close" aria-label="Прервать заседание"><span>×</span></button>
+              <button type="button" class="sh-trib-x" data-t="close" aria-label="Прервать заседание — ответы сохранятся"><span>×</span></button>
             </header>
             <div class="sh-ticks" aria-hidden="true">${qs.map((x, n) => `<i class="${n === trib.i ? "now" : answered(x) ? "done" : ""}"></i>`).join("")}</div>
             <section class="sh-q ${swap ? "swap" : ""}">
               <span class="sh-q-no" aria-hidden="true">${pad(trib.i + 1)}</span>
-              <p class="sh-q-text" id="sh-q-text">${esc(q.text)}</p>
+              <p class="sh-q-text">${esc(q.text)}</p>
               ${q.hint ? `<p class="sh-q-hint">${esc(q.hint)}</p>` : ""}
               ${body}
             </section>
             <footer class="sh-trib-foot">
               <button type="button" class="sh-btn line" data-t="back" ${trib.i ? "" : "disabled"}>← Назад</button>
-              <span class="sh-keys">цифры — ответ, Enter — дальше</span>
+              <span class="sh-keys">${type === "multi" ? "цифры или пробел — отметить, Enter — дальше" : "цифры — ответ, Enter — дальше"}</span>
               ${
                 last
-                  ? `<button type="button" class="sh-btn fire" data-t="sentence" ${all || (ok && qs.every((x) => x === q || answered(x))) ? "" : "disabled"}>Огласить приговор</button>`
+                  ? `<button type="button" class="sh-btn fire" data-t="sentence" ${ok && rest ? "" : "disabled"}>Огласить приговор</button>`
                   : `<button type="button" class="sh-btn" data-t="next" ${ok ? "" : "disabled"}>Дальше →</button>`
               }
             </footer>
@@ -423,9 +523,8 @@
       }
 
       function focusOption() {
-        const q = quiz.questions[trib.i];
         const opts = [...dlg.querySelectorAll(".sh-opt")];
-        (opts.find((o) => o.getAttribute("aria-checked") === "true") ?? (q.type === "multi" ? opts[0] : opts[0]))?.focus({ preventScroll: true });
+        (opts.find((o) => o.getAttribute("aria-checked") === "true") ?? opts[0])?.focus({ preventScroll: true });
       }
 
       function go(delta) {
@@ -434,6 +533,7 @@
         const q = quiz.questions[trib.i];
         if (delta > 0 && q.type === "multi" && !Array.isArray(trib.answers[q.id])) trib.answers[q.id] = []; // «никого» — тоже ответ
         trib.i = n;
+        saveDraft();
         renderQuestion(true);
         dlg.scrollTop = 0;
         focusOption();
@@ -446,14 +546,15 @@
           const cur = new Set(Array.isArray(trib.answers[q.id]) ? trib.answers[q.id] : []);
           cur.has(v) ? cur.delete(v) : cur.add(v);
           trib.answers[q.id] = (q.options ?? []).map((o) => o.id).filter((id) => cur.has(id));
+          saveDraft();
           for (const b of dlg.querySelectorAll(".sh-opt")) b.setAttribute("aria-pressed", String(cur.has(b.dataset.v)));
           return;
         }
         trib.answers[q.id] = type === "scale" ? Number(v) : v;
+        saveDraft();
         for (const b of dlg.querySelectorAll(".sh-opt")) b.setAttribute("aria-checked", String(b.dataset.v === String(v)));
         const at = trib.i;
-        const last = at === quiz.questions.length - 1;
-        if (last) {
+        if (at === quiz.questions.length - 1) {
           const btn = dlg.querySelector('[data-t="sentence"]');
           if (btn) btn.disabled = !quiz.questions.every(answered);
           return;
@@ -473,6 +574,7 @@
           return focusOption();
         }
         trib.done = true;
+        dropDraft();
         const score = ctx.saveQuiz(trib.answers);
         const v = ctx.verdictFor(score);
         dlg.innerHTML = `
@@ -483,14 +585,14 @@
             </header>
             <section class="sh-sentence" aria-live="polite">
               <span class="sh-sentence-kicker">Приговор</span>
-              <div class="sh-sentence-seal" role="img" aria-label="Оценка ${ctx.fmtScore(score)} из 10">
+              <div class="sh-sentence-seal ${tier(score)}" role="img" aria-label="Оценка ${ctx.fmtScore(score)} из 10">
                 <span class="sh-press"><b>${ctx.fmtScore(score)}</b></span>
                 ${ctx.reducedMotion ? "" : `<span class="sh-strike" aria-hidden="true"></span>${burstHtml(14)}`}
               </div>
               <p class="sh-sentence-label">${esc(v?.label ?? "Вынесен")}</p>
               <p class="sh-sentence-text">${esc(v?.text ?? "")}</p>
               <div class="sh-sentence-foot">
-                <button type="button" class="sh-btn line" data-t="again">Пересмотреть</button>
+                <button type="button" class="sh-btn line" data-t="again">Обжаловать</button>
                 <button type="button" class="sh-btn" data-t="close">Закрыть дело</button>
               </div>
             </section>
@@ -508,6 +610,7 @@
         if (t === "next") go(1);
         if (t === "sentence") sentence();
         if (t === "again") {
+          // обжалование: те же ответы, с первого вопроса
           trib.i = 0;
           trib.done = false;
           renderQuestion(true);
@@ -526,19 +629,25 @@
           return pick(opts[Number(e.key) - 1].dataset.v);
         }
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-          const i = opts.indexOf(document.activeElement);
-          if (i < 0 && !opts.length) return;
+          if (!opts.length) return;
           e.preventDefault();
+          const i = opts.indexOf(document.activeElement);
           opts[(i + (e.key === "ArrowDown" ? 1 : -1) + opts.length) % opts.length]?.focus();
         }
-        if (e.key === "Enter" && !e.target.closest("button")) {
-          e.preventDefault();
-          (dlg.querySelector('[data-t="next"]:not(:disabled)') ?? dlg.querySelector('[data-t="sentence"]:not(:disabled)'))?.click();
+        if (e.key === "Enter") {
+          // на вопросе с несколькими ответами Enter ведёт дальше (отмечают пробелом или цифрой);
+          // на обычном — Enter на варианте выбирает его, и заседание идёт дальше само
+          const multi = quiz.questions[trib.i].type === "multi";
+          if ((multi && e.target.closest(".sh-opt")) || !e.target.closest("button")) {
+            e.preventDefault();
+            (dlg.querySelector('[data-t="next"]:not(:disabled)') ?? dlg.querySelector('[data-t="sentence"]:not(:disabled)'))?.click();
+          }
         }
       });
 
       ctx.listen(dlg, "close", () => {
         trib.done = true;
+        renderVerdict(); // кнопка знает, осталось ли незаконченное заседание
         (verdict.querySelector('[data-act="tribunal"]') ?? root.querySelector(".sh-back"))?.focus({ preventScroll: true });
       });
 
@@ -559,6 +668,7 @@
         // прямой заход по ссылке: экран закрыт сразу, под ним ещё ничего нет
         layer = ctx.layer("sh-cut closed");
         layer.innerHTML = cutHtml(item, esc);
+        armArt(layer);
         started = pageBuilt - 500;
       }
 
@@ -571,14 +681,14 @@
         void layer.offsetWidth;
         layer.classList.add("opening");
         page.classList.add("sh-in");
-        later(() => layer.remove(), 1200);
+        later(() => layer.remove(), 1500);
       };
       // название держится на закрытом экране; странице под ним нужно не меньше трети секунды, чтобы собраться
-      const hold = again ? 1250 : 1900;
+      const hold = again ? 1200 : 1750;
       const timer = later(open, Math.max(320, hold - (performance.now() - started)));
       const hurry = () => {
         if (opened || performance.now() - pageBuilt < 320) return;
-        clearTimeout(timer);
+        cancel(timer);
         open();
       };
       ctx.listen(window, "pointerdown", hurry);

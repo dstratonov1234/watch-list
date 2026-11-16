@@ -1,6 +1,6 @@
 {
   "updated": "2026-11-15",
-  "build": "c9d8938c1a",
+  "build": "7878c373f0",
   "sync": {
     "repo": "dstratonov1234/watch-list",
     "branch": "state",
@@ -21,7 +21,7 @@
       "type": "anime",
       "added": "2026-11-15",
       "cover": "https://yushakei-pj.com/assets/img/top/kv04.jpg",
-      "hero": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/167152-6QxZG8Dmf1EL.jpg",
+      "hero": "https://yushakei-pj.com/assets/img/top/kv02.jpg",
       "logo": "https://yushakei-pj.com/assets/img/common/logo/logo_yoko.png",
       "images": {
         "dossier": "https://yushakei-pj.com/assets/img/top/kv01.jpg"
