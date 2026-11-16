@@ -558,6 +558,9 @@
       // место тайтла в серии (сезоны, фильмы по порядку просмотра): { id, title, index, total, prev, next } или null;
       // prev/next — { title, href, added, released, status }: href есть, только если эта часть уже добавлена на сайт
       chain: () => chainOf(t),
+      // сверка «то ли я смотрю»: { original, year, length, facts: [...], links: [{ label, href }] } — показать в образе
+      // тайтла; ссылки ведут на карточку этой части в базах — открывать в новой вкладке
+      ident: () => identOf(t),
       art: themeBase(t).art,
       esc,
       safeUrl,
@@ -998,6 +1001,28 @@
     return null;
   }
 
+  // Сверка — по чему пользователь убеждается, что включил именно эту часть: оригинальное название, год,
+  // длительность (у фильма) или число серий, и ссылки на карточку этой части в базах (Кинопоиск, Shikimori…).
+  // { original, year, length, facts: [строки для показа], links: [{ label, href }] }
+  function identOf(t) {
+    const year = Number.isInteger(t.year) ? t.year : null;
+    const min = Number.isInteger(t.runtime) && t.runtime > 0 ? t.runtime : null;
+    const p = progressOf(t);
+    const unit = p.parts[0]?.unit ?? "episode";
+    const h = min ? Math.floor(min / 60) : 0;
+    const length = min ? [h ? `${h} ч` : "", min % 60 ? `${min % 60} мин` : ""].filter(Boolean).join(" ") : unit !== "film" && p.total > 1 ? `${p.total} ${unitWord(unit, p.total)}` : "";
+    const original = t.original && t.original !== t.title ? String(t.original) : "";
+    const links = (Array.isArray(t.links) ? t.links : []).map((l) => ({ label: String(l?.label ?? ""), href: safeUrl(l?.url) })).filter((l) => l.label && l.href);
+    return { original, year, length, facts: [original, year ? String(year) : "", length].filter(Boolean), links };
+  }
+
+  function identHtml(t) {
+    const d = identOf(t);
+    if (!d.facts.length && !d.links.length) return "";
+    const links = d.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener noreferrer">${esc(l.label)} ↗</a>`).join("");
+    return `<p class="ident">${d.facts.map((f) => `<span>${esc(f)}</span>`).join("")}${links ? `<span class="ident-links"><small>сверить</small>${links}</span>` : ""}</p>`;
+  }
+
   function chainHtml(t) {
     const c = chainOf(t);
     if (!c || (!c.prev && !c.next)) return "";
@@ -1117,6 +1142,7 @@
           <div class="hero-title">
             ${hasLogo ? imgTag(logoUrls(t), `class="hero-logo" alt="${esc(t.title)}"`) : ""}
             <h1>${esc(t.title)}</h1>
+            ${identHtml(t)}
           </div>
         </div>
       </header>

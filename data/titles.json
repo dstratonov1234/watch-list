@@ -1,6 +1,6 @@
 {
   "updated": "2026-11-15",
-  "build": "5f80072ae3",
+  "build": "830df029cc",
   "sync": {
     "repo": "dstratonov1234/watch-list",
     "branch": "state",
@@ -20,6 +20,17 @@
       ],
       "type": "anime",
       "added": "2026-11-15",
+      "year": 2026,
+      "links": [
+        {
+          "label": "Shikimori",
+          "url": "https://shikimori.io/animes/56009-yuusha-kei-ni-shosu-choubatsu-yuusha-9004-tai-keimu-kiroku"
+        },
+        {
+          "label": "AniList",
+          "url": "https://anilist.co/anime/167152"
+        }
+      ],
       "cover": "https://yushakei-pj.com/assets/img/top/kv04.jpg",
       "hero": "https://yushakei-pj.com/assets/img/top/kv02.jpg",
       "logo": "https://yushakei-pj.com/assets/img/common/logo/logo_yoko.png",
@@ -84,6 +95,18 @@
       ],
       "type": "film",
       "added": "2026-11-15",
+      "year": 2012,
+      "runtime": 142,
+      "links": [
+        {
+          "label": "Кинопоиск",
+          "url": "https://www.kinopoisk.ru/film/468581/"
+        },
+        {
+          "label": "Википедия",
+          "url": "https://ru.wikipedia.org/wiki/Голодные_игры_(фильм)"
+        }
+      ],
       "cover": "https://image.tmdb.org/t/p/w780/5QrQfsH4y7KHDYt9oaVGFtGb2Vm.jpg",
       "hero": "https://image.tmdb.org/t/p/w1280/eVYChqJavS1DCXFeJE2lzVUMLKp.jpg",
       "logo": "https://image.tmdb.org/t/p/original/ame4aKhVLoOjKpKJRA50kT0bs5c.png",

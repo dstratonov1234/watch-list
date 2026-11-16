@@ -231,6 +231,16 @@
       };
       const partsNav = chain && (chain.prev || chain.next) ? `<nav class="sh-parts" aria-label="Порядок просмотра">${partLink(chain.prev, "prev")}${partLink(chain.next, "next")}</nav>` : "";
 
+      // Сверка «то ли я включил»: оригинальное название и год — строкой в деле, под ними ссылки на карточку
+      // этого сезона. Число серий уже стоит в середине печати — здесь его не повторяем.
+      const id = ctx.ident();
+      const facts = [id.original, id.year].filter(Boolean);
+      const dossierRefs =
+        (facts.length ? `<p class="sh-facts">${facts.map((f) => `<span>${esc(String(f))}</span>`).join("")}</p>` : "") +
+        (id.links.length
+          ? `<p class="sh-refs"><small>сверить дело</small>${id.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener noreferrer">${esc(l.label)} ↗</a>`).join("")}</p>`
+          : "");
+
       // Печать — во всю левую часть экрана, под ней по её оси — зарубки и приговор словами.
       // Справа — имя и выбранный приказ. Действие на экране одно: печать на приказе, а когда всё исполнено —
       // «созвать трибунал» в середине печати.
@@ -242,6 +252,7 @@
             ${ctx.art.logo('alt=""')}
             <h1 class="sh-name">${esc(item.title)}</h1>
             <p class="sh-unit">Штрафной отряд 9004 · тюремные записи</p>
+            ${dossierRefs}
             ${partsNav}
           </header>
           <section class="sh-seat" aria-label="Печать приговора">

@@ -425,7 +425,18 @@ html[data-title="the-hunger-games"] body { background: var(--hg-night); }
   outline: none;
 }
 
-.hg-kicker { font: 500 11.5px/1.3 var(--t-body); letter-spacing: 0.4em; text-transform: uppercase; color: var(--hg-holo); }
+/* строка над названием: место в серии и сверка — оригинальное название, год, длительность */
+.hg-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 0; margin: 0; font: 500 11.5px/1.4 var(--t-body); letter-spacing: 0.26em; text-transform: uppercase; color: color-mix(in srgb, var(--hg-ice) 82%, transparent); }
+.hg-kicker b { font-weight: 600; letter-spacing: 0.4em; color: var(--hg-holo); }
+/* точка — после слова, а не перед: при переносе строка не начинается с разделителя */
+.hg-kicker > :not(:last-child)::after { content: "·"; margin: 0 0.7em 0 0.5em; color: var(--hg-holo); opacity: 0.7; }
+/* ссылки на карточку фильма — тихой строкой под действием */
+.hg-refs { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 18px; margin: 2px 0 -12px; font: 600 12px/1.15 var(--t-body); letter-spacing: 0.2em; text-transform: uppercase; }
+.hg-refs small { font: 600 11px/1.15 var(--t-body); letter-spacing: 0.3em; color: var(--hg-dim); }
+.hg-refs a { padding: 15px 0; color: var(--hg-ice); text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, var(--hg-holo) 60%, transparent); text-underline-offset: 6px; transition: color 0.2s, text-decoration-color 0.2s; }
+.hg-refs a i { font-style: normal; color: var(--hg-holo); }
+.hg-refs a:hover, .hg-refs a:focus-visible { color: var(--hg-holo); text-decoration-color: var(--hg-holo); outline: none; }
+.hg-refs a:focus-visible { text-decoration-color: var(--hg-gold); text-decoration-thickness: 3px; }
 .hg-lower > img { display: block; max-width: min(clamp(340px, 30vw, 600px), 100%); max-height: clamp(120px, 20vh, 220px); object-fit: contain; object-position: left center; filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.8)); transition: max-width 0.6s ease; }
 /* балл объявлен — главное на экране он, название уступает место */
 .hg-air.judged .hg-lower > img { max-width: min(clamp(280px, 22vw, 440px), 100%); }
@@ -788,6 +799,9 @@ a.hg-tick:focus-visible { box-shadow: inset 0 -3px 0 var(--hg-gold); }
 
 @media (max-width: 620px) {
   .hg-bug { font-size: 10.5px; letter-spacing: 0.2em; }
+  .hg-kicker { font-size: 11px; letter-spacing: 0.16em; }
+  .hg-kicker b { letter-spacing: 0.26em; }
+  .hg-refs { gap: 0 14px; letter-spacing: 0.14em; }
   .hg-bug i { width: 36px; height: 36px; }
   .hg-line { font-size: 16px; }
   .hg-btn { padding: 14px 26px 13px 20px; font-size: 13px; letter-spacing: 0.2em; }

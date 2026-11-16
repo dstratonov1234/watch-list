@@ -143,6 +143,14 @@
         const body = `<small>${label}</small><b>${esc(x.title)}</b>`;
         return x.href ? `<a class="hg-tick" href="${esc(x.href)}">${body}<span aria-hidden="true">→</span></a>` : `<span class="hg-tick off">${body}<span>— ${x.released ? "ещё не добавлен" : "ещё не вышел"}</span></span>`;
       };
+      // Сверка «то ли я включил»: в строке над названием — место в серии, оригинальное название, год и
+      // длительность; под действием — ссылки на карточку этого фильма.
+      const id = ctx.ident();
+      const place = chain && chain.total > 1 ? `${item.type === "film" ? "Фильм" : "Часть"} ${chain.index} из ${chain.total}` : "Эфир Капитолия";
+      const kicker = `<p class="hg-kicker"><b>${place}</b>${id.facts.map((f) => `<span>${esc(f)}</span>`).join("")}</p>`;
+      const refs = id.links.length
+        ? `<p class="hg-refs"><small>сверить</small>${id.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener noreferrer">${esc(l.label)} <i aria-hidden="true">↗</i></a>`).join("")}</p>`
+        : "";
       const loop = "74-е Голодные игры · Весь мир смотрит · И пусть удача всегда будет с вами · ";
       const ticker = `
         <footer class="hg-ticker">
@@ -159,10 +167,11 @@
           </header>
           <div class="hg-stage">
             <section class="hg-lower" tabindex="-1">
-              <span class="hg-kicker">${chain && chain.total > 1 ? `${item.type === "film" ? "Фильм" : "Часть"} ${chain.index} из ${chain.total}` : "Эфир Капитолия"}</span>
+              ${kicker}
               ${logo}
               <h1 class="hg-name">${esc(item.title)}</h1>
               <div class="hg-state"></div>
+              ${refs}
               <p class="sr-only" aria-live="polite" data-say></p>
             </section>
             <aside class="hg-card" aria-label="Оценка распорядителей">

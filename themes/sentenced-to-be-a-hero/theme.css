@@ -637,6 +637,16 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   color: var(--sh-gold);
 }
 
+/* сверка: оригинальное название и год — строкой дела, ниже ссылки на карточку этого сезона */
+.sh-facts { margin: 0; font: italic 400 13px/1.45 var(--t-body); color: var(--sh-dim); }
+/* обычный текст, а не колонки: длинное название переносится как фраза, год остаётся за ним */
+.sh-facts span:not(:last-child)::after { content: " · "; color: var(--sh-gold); }
+.sh-refs { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 14px; margin: -4px 0 0; font: 700 12px/1.4 var(--t-body); letter-spacing: 0.08em; }
+.sh-refs small { font: 700 9.5px/1.4 var(--t-body); letter-spacing: 0.24em; text-transform: uppercase; color: var(--sh-gold); }
+.sh-refs a { padding: 8px 0; color: var(--sh-paper); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--sh-gold) 55%, transparent); text-underline-offset: 4px; transition: color 0.2s; }
+.sh-refs a:hover, .sh-refs a:focus-visible { color: #ffd08a; outline: none; }
+.sh-refs a:focus-visible { box-shadow: 0 2px 0 var(--sh-fire); }
+
 /* порядок просмотра: что перед этой частью и что дальше */
 .sh-parts { display: grid; gap: 6px; align-self: stretch; }
 
@@ -1652,6 +1662,8 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
   .sh-name { flex: 1 1 120px; font-size: 11.5px; letter-spacing: 0.16em; }
   .sh-unit { display: none; }
   .sh-parts { flex: 1 1 100%; }
+  .sh-facts, .sh-refs { flex: 1 1 100%; }
+  .sh-refs a { padding: 13px 0; }
   .sh-dial { width: min(calc(100% - 64px), 460px); margin: 3% 0 8%; }
 
   .sh-chain {

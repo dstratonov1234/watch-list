@@ -654,6 +654,14 @@ body.leaving #list-view {
 .neighbor.next { text-align: right; }
 
 /* цепочка серии: следующая и предыдущая часть по порядку просмотра; часть без страницы — без ссылки */
+/* сверка: оригинальное название, год, длительность и ссылки на карточку этой части */
+.ident { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 0; margin: 10px 0 0; font-size: 13px; color: var(--text-dim, #a8b0c0); }
+.ident > span:not(.ident-links):not(:last-child)::after { content: "·"; margin: 0 9px; opacity: 0.6; }
+.ident-links { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-left: 18px; }
+.ident-links small { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
+.ident-links a { color: inherit; text-decoration: underline; text-underline-offset: 4px; }
+.ident-links a:hover, .ident-links a:focus-visible { color: var(--text, #fff); }
+
 .neighbors.chain { margin-top: 40px; }
 .neighbors.chain + .neighbors { margin-top: 12px; }
 .neighbor.off { opacity: 0.62; }

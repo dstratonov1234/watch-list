@@ -60,6 +60,17 @@ function checkTitle(t, seen) {
     else urls.push([u, `${at}.images.${k}`]);
   }
 
+  // сверка «то ли я смотрю»: год и ссылки на карточку именно этой части (Кинопоиск, Shikimori, Википедия…)
+  if (t.year == null) err(`${at}: нет year — года выхода этой части (нужен для сверки)`);
+  else if (!Number.isInteger(t.year) || t.year < 1880 || t.year > 2100) err(`${at}: year — год числом`);
+  if (t.runtime != null && (!Number.isInteger(t.runtime) || t.runtime <= 0)) err(`${at}: runtime — длительность в минутах, целое число`);
+  if (!Array.isArray(t.links) || !t.links.length) err(`${at}: нет links — хотя бы одной ссылки на карточку этой части (для сверки)`);
+  for (const [i, l] of (Array.isArray(t.links) ? t.links : []).entries()) {
+    if (!l?.label || typeof l.label !== "string") err(`${at}: links[${i}] — нет label`);
+    if (!URL_RE.test(l?.url ?? "")) err(`${at}: links[${i}].url — не http(s)-ссылка`);
+  }
+  if (t.type === "film" && t.runtime == null) warn(`${at}: у фильма нет runtime (минуты) — в сверке не будет длительности`);
+
   const partIds = new Set();
   if (!Array.isArray(t.parts) || !t.parts.length) err(`${at}: нужна хотя бы одна часть в parts`);
   for (const p of t.parts ?? []) {
