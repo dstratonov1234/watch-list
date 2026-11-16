@@ -498,7 +498,8 @@
   transition: transform 3.6s cubic-bezier(0.2, 0.6, 0.2, 1) 0.4s;
 }
 
-.sh-cut.art:is(.closing, .closed) .sh-cut-art { opacity: 0.42; }
+/* :not(.opening) — иначе это правило сильнее правила открытия, и арт висит поверх страницы до удаления слоя */
+.sh-cut.art:is(.closing, .closed):not(.opening) .sh-cut-art { opacity: 0.42; }
 .sh-cut.art:is(.closing, .closed) .sh-cut-art img { transform: scale(1); }
 .sh-cut.closed .sh-cut-art { transition-delay: 0.05s; }
 .sh-cut.opening .sh-cut-art { opacity: 0; transition: opacity 0.28s ease; }
@@ -512,6 +513,16 @@
 .sh-cut.opening .sh-cut-title { opacity: 0; transform: scale(0.97); transition: opacity 0.2s ease, transform 0.4s ease; }
 
 /* ---------------------------------------------------------- страница --- */
+/* Зал приговора. В центре — печать приговора: пламенное кольцо священной печати из мира сериала;
+   по его окружности — приказы о наказании: исполненные горят, остальные погашены, в середине — приговор.
+   Слева — дело (имя, счёт приказов, приговор словами), справа — выбранный приказ с кадром и печатью
+   «исполнено». Всё на одном экране: приказы не лента карточек, а сектора одной печати. */
+
+@property --sh-fill {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
 
 html[data-title="sentenced-to-be-a-hero"] {
   --sh-ink: #0c0a09;
@@ -533,6 +544,7 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   pointer-events: none;
   background:
     radial-gradient(900px 620px at 12% -8%, rgba(179, 39, 43, 0.22), transparent 70%),
+    radial-gradient(1000px 700px at 50% 46%, rgba(239, 138, 58, 0.09), transparent 62%),
     radial-gradient(700px 520px at 100% 30%, rgba(196, 162, 82, 0.06), transparent 70%);
 }
 
@@ -546,151 +558,118 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   background: url(assets/ground.webp) center bottom / cover no-repeat;
   -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 88%);
   mask-image: linear-gradient(to top, #000 0%, transparent 88%);
-  opacity: 0.34;
+  opacity: 0.36;
 }
 
-.sh-page {
+.sh-hall {
+  --pad: clamp(18px, 2.6vw, 40px);
+  position: relative;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-  gap: clamp(24px, 4vw, 64px);
+  grid-template-columns: minmax(210px, 290px) minmax(0, 1fr) minmax(300px, 410px);
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "ident seat order"
+    "docket seat order"
+    "neigh neigh neigh";
+  column-gap: clamp(16px, 2.2vw, 36px);
   width: 100%;
-  max-width: 1320px;
+  max-width: 1600px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 26px clamp(16px, 3vw, 40px) 90px;
+  padding: var(--pad);
   color: var(--sh-paper);
   font-family: var(--t-body);
 }
 
-/* ---- дело: портрет, имя, счёт, приговор ---- */
+/* ---- дело: имя, счёт приказов, приговор словами ---- */
 
-.sh-dossier {
-  position: sticky;
-  top: 26px;
-  align-self: start;
+.sh-ident {
+  grid-area: ident;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  height: calc(100vh - 52px);
-  min-height: 620px;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
 }
 
 .sh-back {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 3;
-  padding: 9px 22px 9px 14px;
-  background: var(--sh-ink);
-  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  margin-bottom: 14px;
+  padding: 6px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--sh-gold) 55%, transparent);
   font: 700 11.5px/1 var(--t-body);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   text-decoration: none;
   color: var(--sh-gold);
-  transition: color 0.2s, padding 0.25s;
+  transition: color 0.2s, padding 0.25s, border-color 0.2s;
 }
 
-.sh-back:hover, .sh-back:focus-visible { color: var(--sh-paper); padding-left: 20px; outline: none; }
-.sh-back:focus-visible { box-shadow: inset 0 -2px 0 var(--sh-fire); }
-
-.sh-portrait {
-  position: relative;
-  flex: 1 1 0;
-  min-height: 0;
-  background: #120d0b;
-  clip-path: polygon(0 0, calc(100% - 46px) 0, 100% 46px, 100% 100%, 46px 100%, 0 calc(100% - 46px));
-}
-
-.sh-portrait > img {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 30%;
-}
-
-.sh-portrait::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(180deg, rgba(12, 10, 9, 0.45) 0%, transparent 22%, transparent 48%, rgba(12, 10, 9, 0.9) 84%, var(--sh-ink) 100%);
-}
-
-/* тонкая золотая рамка внутри портрета, со срезанными углами */
-.sh-portrait::after {
-  content: "";
-  position: absolute;
-  inset: 9px;
-  z-index: 2;
-  clip-path: polygon(0 0, calc(100% - 42px) 0, 100% 42px, 100% 100%, 42px 100%, 0 calc(100% - 42px));
-  background:
-    linear-gradient(var(--sh-gold), var(--sh-gold)) 0 0 / calc(100% - 42px) 1px no-repeat,
-    linear-gradient(var(--sh-gold), var(--sh-gold)) 100% 42px / 1px calc(100% - 42px) no-repeat,
-    linear-gradient(var(--sh-gold), var(--sh-gold)) 100% 100% / calc(100% - 42px) 1px no-repeat,
-    linear-gradient(var(--sh-gold), var(--sh-gold)) 0 0 / 1px calc(100% - 42px) no-repeat;
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.sh-ident {
-  position: absolute;
-  left: 30px;
-  right: 30px;
-  bottom: 26px;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sh-ident img { display: block; width: 100%; max-width: 330px; height: auto; filter: drop-shadow(0 4px 14px #000); }
+.sh-back:hover, .sh-back:focus-visible { padding-left: 8px; border-color: var(--sh-paper); color: var(--sh-paper); outline: none; }
+.sh-back:focus-visible { box-shadow: 0 2px 0 var(--sh-fire); }
+.sh-ident img { display: block; width: 100%; max-width: 280px; height: auto; filter: drop-shadow(0 4px 14px #000); }
 
 .sh-name {
   margin: 0;
   font: 700 13px/1.4 var(--t-display);
-  letter-spacing: 0.26em;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sh-paper);
+}
+
+.sh-unit {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--sh-gold) 50%, transparent);
+  box-shadow: 0 -4px 0 -3px color-mix(in srgb, var(--sh-gold) 28%, transparent);
+  font: 700 10px/1.5 var(--t-body);
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--sh-gold);
 }
 
-.sh-served {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 6px 20px;
-}
-
-.sh-served-num { grid-row: span 2; display: flex; align-items: baseline; gap: 8px; }
-
-.sh-served-num b {
-  font: 900 76px/0.82 var(--t-display);
-  font-variant-numeric: lining-nums;
-  color: var(--sh-paper);
-}
-
-.sh-served-num span { font: italic 700 24px/1 var(--t-display); color: var(--sh-gold); }
-
-.sh-served-label {
+.sh-docket {
+  grid-area: docket;
   align-self: end;
-  font: 700 11px/1.2 var(--t-body);
-  letter-spacing: 0.24em;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+  padding-bottom: 6px;
+}
+
+.sh-served { display: grid; justify-items: start; gap: 9px; color: var(--sh-paper); }
+
+.sh-served-line {
+  margin: 0;
+  font: 700 10.5px/1.4 var(--t-body);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--sh-dim);
 }
 
-.sh-served .sh-tally { align-self: start; color: var(--sh-paper); }
+.sh-served-line b { font: 800 17px/1 var(--t-display); letter-spacing: 0.04em; color: var(--sh-paper); }
+.sh-where { margin: 0; font: italic 400 15px/1.4 var(--t-body); color: var(--sh-dim); }
+.sh-where b { font-style: normal; font-weight: 700; color: var(--sh-paper); }
+.sh-served .sh-btn { margin-top: 6px; }
 
-.sh-where {
-  grid-column: 1 / -1;
-  margin: 4px 0 0;
-  font: italic 400 15px/1.4 var(--t-body);
-  color: var(--sh-dim);
+/* в узкой колонке дела кнопки не должны ломаться на две строки */
+.sh-docket .sh-btn { padding: 13px 22px; letter-spacing: 0.13em; white-space: nowrap; }
+
+.sh-verdict {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--sh-gold) 50%, transparent);
 }
 
-.sh-where b { font-style: normal; font-weight: 700; color: var(--sh-paper); }
+.sh-verdict:empty { display: none; }
+.sh-verdict-kicker { font: 700 10.5px/1.2 var(--t-body); letter-spacing: 0.24em; text-transform: uppercase; color: var(--sh-gold); }
+.sh-verdict-label { font: italic 700 clamp(22px, 2.1vw, 29px) / 1.15 var(--t-display); color: var(--sh-paper); }
+.sh-verdict-text { font-size: 14.5px; line-height: 1.45; color: var(--sh-dim); }
+.sh-verdict .sh-btn { margin-top: 12px; }
+.sh-verdict-note { font: italic 400 14.5px/1.45 var(--t-body); color: var(--sh-dim); }
 
 .sh-btn {
   position: relative;
@@ -729,174 +708,328 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 }
 
 .sh-btn.line:hover, .sh-btn.line:focus-visible { background: var(--sh-paper); color: var(--sh-paper); }
-.sh-served .sh-btn { grid-column: 1 / -1; justify-self: start; margin-top: 6px; }
 
-/* приговор */
-.sh-verdict { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 20px; min-height: 112px; }
-.sh-verdict:empty { display: none; }
+/* ---- печать приговора ---- */
 
-.sh-seal {
+.sh-seat {
+  grid-area: seat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* части (сезоны): какой круг приказов показывает печать */
+.sh-tabs { position: relative; z-index: 2; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+
+.sh-tab {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 22px 10px;
+  border: 0;
+  background: var(--sh-iron);
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  color: var(--sh-dim);
+  font: 800 12px/1 var(--t-display);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sh-tab small { font: italic 700 12px/1 var(--t-display); letter-spacing: 0.02em; }
+.sh-tab:hover, .sh-tab:focus-visible { color: var(--sh-paper); outline: none; }
+.sh-tab:focus-visible { box-shadow: inset 0 -3px 0 var(--sh-fire); }
+.sh-tab[aria-selected="true"] { background: var(--sh-gold); color: var(--sh-ink); }
+
+.sh-dial {
   position: relative;
-  grid-row: span 3;
+  container-type: inline-size;
+  width: min(calc(100% - 124px), 74vh, 680px);
+  aspect-ratio: 1;
+  margin: 7% 0 6%;
+}
+
+/* печать висит на цепях; помилование (приговор от 7,5) их снимает */
+.sh-chain {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  width: 14px;
+  height: 100vmax;
+  margin-left: -7px;
+  transform-origin: 50% 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='34' viewBox='0 0 14 34'%3E%3Crect x='2.5' y='1.5' width='9' height='19' rx='4.5' fill='none' stroke='%234a4037' stroke-width='3'/%3E%3Crect x='5.5' y='17' width='3' height='17' rx='1.5' fill='%233b342d'/%3E%3C/svg%3E") 0 0 / 14px 34px repeat-y;
+  pointer-events: none;
+  transition: opacity 1.2s ease 0.4s;
+}
+
+.sh-chain.a { transform: rotate(153deg) translateY(45cqw); }
+.sh-chain.b { transform: rotate(207deg) translateY(45cqw); }
+.sh-hall.tier-hi .sh-chain { opacity: 0; }
+
+/* середина печати: осуждённый под куполом собора, вид сверху */
+.sh-dial-core {
+  position: absolute;
+  inset: 24.5%;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #0a0807;
+}
+
+.sh-dial-core img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  filter: brightness(0.62) saturate(0.95);
+  transform: scale(1.3);
+}
+
+.sh-dial-core::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(7, 6, 5, 0.74) 0 30%, rgba(7, 6, 5, 0.3) 66%, rgba(7, 6, 5, 0.78) 100%);
+}
+
+.sh-dial-ring {
+  position: absolute;
+  inset: 0;
+  background: url(assets/seal.webp) center / contain no-repeat;
+  pointer-events: none;
+}
+
+/* погашенное кольцо — и поверх него горящая часть: столько, сколько приказов исполнено */
+.sh-dial-ring.dim { filter: grayscale(1) brightness(0.36) contrast(1.15); }
+
+.sh-dial-ring.lit {
+  -webkit-mask-image: conic-gradient(#000 calc(var(--sh-fill) * 1turn), transparent 0);
+  mask-image: conic-gradient(#000 calc(var(--sh-fill) * 1turn), transparent 0);
+  filter: drop-shadow(0 0 16px rgba(239, 138, 58, 0.5));
+}
+
+/* разрезы между приказами */
+.sh-dial-gaps {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from -0.3deg, #070605 0 0.6deg, transparent 0.6deg calc(360deg / var(--n, 12)));
+  -webkit-mask-image: radial-gradient(closest-side, transparent 54%, #000 56%, #000 88%, transparent 92%);
+  mask-image: radial-gradient(closest-side, transparent 54%, #000 56%, #000 88%, transparent 92%);
+  pointer-events: none;
+}
+
+.sh-dial.dense .sh-dial-gaps { display: none; }
+
+.sh-dial-svg { position: absolute; inset: -12%; width: 124%; height: 124%; overflow: visible; }
+
+.sh-w {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 0.7;
+  outline: none;
+  cursor: pointer;
+  pointer-events: all;
+  transition: fill 0.2s, stroke 0.2s;
+}
+
+.sh-w:hover { fill: rgba(236, 227, 208, 0.12); }
+.sh-w.next { stroke: var(--sh-fire); stroke-dasharray: 2 1.6; }
+.sh-w.doomed { fill: rgba(12, 10, 9, 0.62); }
+
+.sh-w.sel {
+  fill: rgba(255, 243, 214, 0.08);
+  stroke: #fff3d6;
+  stroke-width: 1.2;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 3px rgba(255, 208, 138, 0.95));
+}
+
+.sh-w:focus-visible { stroke: #fff; stroke-width: 2; }
+
+.sh-wn {
+  font-family: var(--t-display);
+  font-size: 5.6px;
+  font-weight: 800;
+  font-variant-numeric: lining-nums;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: var(--sh-dim);
+  opacity: 0.5;
+  pointer-events: none;
+  transition: fill 0.3s, opacity 0.3s, font-size 0.25s;
+}
+
+.sh-wn.seen { fill: var(--sh-gold); opacity: 1; }
+.sh-wn.next { fill: var(--sh-fire); opacity: 1; }
+.sh-wn.sel { fill: #fff3d6; font-size: 8px; opacity: 1; }
+
+/* середина: счёт приказов, а после трибунала — приговор */
+.sh-dial-center {
+  position: absolute;
+  inset: 25%;
+  z-index: 2;
   display: grid;
-  place-items: center;
-  width: 112px;
-  height: 112px;
+  place-content: center;
+  justify-items: center;
+  gap: 1.2cqw;
+  border-radius: 50%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.sh-dial-center > * { pointer-events: auto; }
+
+.sh-center-btn {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.2cqw;
+  width: 50cqw;
+  height: 50cqw;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sh-center-btn:focus-visible { outline: 2px solid var(--sh-paper); outline-offset: -8px; }
+.sh-count { display: flex; align-items: baseline; gap: 1.4cqw; }
+
+.sh-count b {
+  font: 900 clamp(46px, 20cqw, 150px) / 0.82 var(--t-display);
+  font-variant-numeric: lining-nums;
+  color: var(--sh-paper);
+  text-shadow: 0 4px 24px #000;
+}
+
+.sh-count i { font: italic 700 clamp(15px, 5cqw, 36px) / 1 var(--t-display); color: var(--sh-gold); }
+
+.sh-count-label {
+  font: 700 clamp(8.5px, 2.1cqw, 13px) / 1.2 var(--t-body);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--sh-paper) 78%, transparent);
+  text-shadow: 0 1px 8px #000;
+}
+
+.sh-center-cta {
+  margin-top: 1.8cqw;
+  padding: 1.1cqw 2.8cqw 1.3cqw;
+  background: var(--sh-fire);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  font: 800 clamp(8.5px, 2.1cqw, 12.5px) / 1 var(--t-display);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sh-ink);
+  transition: background 0.2s;
+}
+
+.sh-center-btn:hover .sh-center-cta, .sh-center-btn:focus-visible .sh-center-cta { background: #ffd08a; }
+.sh-score { display: grid; place-content: center; justify-items: center; gap: 0.8cqw; }
+
+.sh-score b {
+  font: 900 clamp(58px, 24cqw, 176px) / 0.84 var(--t-display);
+  font-variant-numeric: lining-nums;
+}
+
+.sh-score i { font: italic 700 clamp(11px, 2.8cqw, 18px) / 1 var(--t-display); color: var(--sh-gold); text-shadow: 0 1px 8px #000; }
+
+/* от 7,5 — оценка горит в самой печати; от 6 — золотой штамп; ниже — кровавый */
+.sh-score.hi b { color: #fff3d6; text-shadow: 0 0 0.3em var(--sh-fire), 0 0 0.9em rgba(239, 138, 58, 0.55), 0 4px 16px #000; }
+
+.sh-score.mid, .sh-score.lo {
+  width: 40cqw;
+  height: 40cqw;
   background: url(assets/stamp.webp) center / contain no-repeat;
   transform: rotate(-8deg);
 }
 
-.sh-seal b {
-  padding: 1px 9px 4px;
-  background: var(--sh-ink);
-  font: 900 38px/1 var(--t-display);
-  font-variant-numeric: lining-nums;
+.sh-score.mid { filter: hue-rotate(38deg) saturate(0.85) brightness(1.35); }
+
+.sh-score.mid b, .sh-score.lo b {
+  padding: 0 2.4cqw 1.6cqw;
+  background: #070605;
+  box-shadow: 0 0 0 0.5cqw var(--sh-blood);
+  font-size: clamp(42px, 16cqw, 120px);
   color: #ff5a4f;
-  box-shadow: 0 0 0 2px var(--sh-blood);
 }
 
-.sh-seal.wait { width: 96px; height: 96px; margin: 8px; background: none; border: 0; transform: none; }
+.sh-score.mid i, .sh-score.lo i { display: none; }
 
-.sh-seal.wait::before {
-  content: "";
+/* удар по сектору: клинок света падает на приказ по радиусу, пламя вспыхивает */
+.sh-dial-strike {
   position: absolute;
-  inset: -13%;
-  background: url(assets/seal.webp) center / contain no-repeat;
-  opacity: 0.8;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  transform: rotate(var(--a));
+  pointer-events: none;
 }
 
-.sh-verdict-kicker { align-self: end; font: 700 10.5px/1.2 var(--t-body); letter-spacing: 0.24em; text-transform: uppercase; color: var(--sh-dim); }
-.sh-verdict-label { font: italic 700 23px/1.15 var(--t-display); color: var(--sh-paper); }
-.sh-verdict-text { align-self: start; font-size: 14.5px; line-height: 1.4; color: var(--sh-dim); }
-.sh-verdict .sh-btn { grid-column: 1 / -1; justify-self: start; margin-top: 10px; }
-.sh-verdict-note { grid-column: 2; font: italic 400 14.5px/1.45 var(--t-body); color: var(--sh-dim); }
+.sh-dial-strike b {
+  position: absolute;
+  left: -24px;
+  bottom: 33cqw;
+  width: 48px;
+  height: 192px;
+  background: url(assets/sword.webp) center bottom / contain no-repeat;
+  filter: drop-shadow(0 0 12px rgba(255, 196, 120, 0.9));
+  animation: sh-strike 0.5s cubic-bezier(0.6, 0, 0.9, 0.5) both;
+}
 
-/* когда приговор вынесен, главным в деле становится он: счёт приказов отступает, печать растёт */
-.sh-dossier.judged .sh-served-num b { font-size: 46px; }
-.sh-dossier.judged .sh-served-num span { font-size: 18px; }
-.sh-dossier.judged .sh-seal { width: 138px; height: 138px; }
-.sh-dossier.judged .sh-seal b { font-size: 50px; }
+.sh-dial-strike .sh-burst { left: 0; top: -38cqw; }
 
-/* от 6 — золотой штамп, от 7,5 — пламенная печать богини с оценкой внутри */
-.sh-dossier .sh-seal.mid { filter: hue-rotate(38deg) saturate(0.85) brightness(1.35); }
-.sh-dossier .sh-seal.hi { width: 164px; height: 164px; margin: -10px -6px; background-image: url(assets/seal.webp); transform: none; }
-.sh-dossier .sh-seal.hi b { padding: 0; background: none; box-shadow: none; font-size: 42px; color: #fff3d6; text-shadow: 0 0 18px var(--sh-fire), 0 2px 10px #000; }
+/* ---- выбранный приказ ---- */
 
-/* ---- приказы ---- */
+.sh-order { grid-area: order; align-self: center; min-width: 0; color: var(--sh-dim); }
+.sh-order.seen, .sh-order.next { color: var(--sh-paper); }
+.sh-order-in { position: relative; isolation: isolate; display: flex; flex-direction: column; }
 
-.sh-ledger { min-width: 0; padding-top: 6px; }
-.sh-part + .sh-part { margin-top: 54px; }
+.sh-order-no {
+  position: absolute;
+  right: -4px;
+  top: -0.66em;
+  z-index: -1;
+  font: 900 clamp(120px, 13vw, 204px) / 0.8 var(--t-display);
+  font-variant-numeric: lining-nums;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--sh-gold) 30%, transparent);
+  pointer-events: none;
+  user-select: none;
+}
 
-.sh-part-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px 18px;
-  margin: 0 0 26px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--sh-gold) 60%, transparent);
-  box-shadow: 0 4px 0 -3px color-mix(in srgb, var(--sh-gold) 35%, transparent);
-  font: 800 clamp(22px, 2.6vw, 30px) / 1.1 var(--t-display);
-  letter-spacing: 0.16em;
+.sh-kind {
+  margin: 0 0 8px;
+  font: 700 11.5px/1.2 var(--t-body);
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--sh-paper);
-}
-
-.sh-part-head span { white-space: nowrap; }
-
-.sh-part-head small {
-  font: 700 11px/1 var(--t-body);
-  letter-spacing: 0.26em;
   color: var(--sh-gold);
 }
 
-.sh-part-head i { margin-left: auto; font: italic 700 18px/1 var(--t-display); letter-spacing: 0.04em; color: var(--sh-gold); }
+.sh-order.next .sh-kind { color: var(--sh-fire); }
 
-.sh-orders { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
-
-.sh-order {
-  position: relative;
-  display: grid;
-  grid-template-columns: 58px minmax(0, 1fr);
-  color: var(--sh-dim);
+.sh-what {
+  display: flex;
+  align-items: flex-end;
+  min-height: 3.75em;
+  margin: 0 0 20px;
+  font: 600 clamp(20px, 1.9vw, 27px) / 1.25 var(--t-display);
+  text-wrap: balance;
 }
 
-/* цепь: у каждого приказа своё звено-отрезок; исполненные — золотые */
-.sh-order::before {
-  content: "";
-  position: absolute;
-  left: 19px;
-  top: 0;
-  bottom: -14px;
-  width: 14px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='34' viewBox='0 0 14 34'%3E%3Crect x='2.5' y='1.5' width='9' height='19' rx='4.5' fill='none' stroke='%233b342d' stroke-width='3'/%3E%3Crect x='5.5' y='17' width='3' height='17' rx='1.5' fill='%233b342d'/%3E%3C/svg%3E") 0 0 / 14px 34px repeat-y;
-}
-
-.sh-order.seen::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='34' viewBox='0 0 14 34'%3E%3Crect x='2.5' y='1.5' width='9' height='19' rx='4.5' fill='none' stroke='%23c4a252' stroke-width='3'/%3E%3Crect x='5.5' y='17' width='3' height='17' rx='1.5' fill='%239c7f3c'/%3E%3C/svg%3E");
-}
-
-.sh-order:last-child::before { bottom: 50%; }
-
-.sh-no {
-  position: relative;
-  z-index: 1;
-  align-self: center;
-  justify-self: start;
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 34px;
-  background: var(--sh-iron);
-  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  font: 800 17px/1 var(--t-display);
-  font-variant-numeric: lining-nums;
-  color: var(--sh-dim);
-  transition: background 0.3s, color 0.3s;
-}
-
-.sh-order.seen .sh-no { background: var(--sh-gold); color: var(--sh-ink); }
-.sh-order.next .sh-no { background: var(--sh-fire); color: var(--sh-ink); }
-
-.sh-slip {
-  position: relative;
-  isolation: isolate;
-  display: grid;
-  grid-template-columns: 172px minmax(0, 1fr) auto;
-  align-items: stretch;
-  min-height: 104px;
-}
-
-/* бумага со срезанным углом — отдельным слоем: срез не должен резать клинок и печать в момент удара */
-.sh-slip::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(rgba(12, 10, 9, 0.55), rgba(12, 10, 9, 0.55)), url(assets/paper.webp) center / 760px auto;
-  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
-}
-
-.sh-order.seen .sh-slip, .sh-order.next .sh-slip { color: var(--sh-paper); }
-.sh-order.seen .sh-slip::after { background: linear-gradient(rgba(12, 10, 9, 0.12), rgba(12, 10, 9, 0.12)), url(assets/paper.webp) center / 760px auto; }
-.sh-order.next .sh-slip::after { background: linear-gradient(rgba(60, 24, 8, 0.4), rgba(12, 10, 9, 0.5)), url(assets/paper.webp) center / 760px auto; }
-.sh-order.just { z-index: 3; }
-
-.sh-slip::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--sh-iron);
-  z-index: 2;
-}
-
-.sh-order.seen .sh-slip::before { background: var(--sh-gold); }
-.sh-order.next .sh-slip::before { background: var(--sh-fire); box-shadow: 0 0 14px 1px var(--sh-fire); }
-
-.sh-still { position: relative; overflow: hidden; background: #0a0807; }
+/* кадр серии со срезом клинка по левому краю; уходит за правый край экрана */
+.sh-still { position: relative; aspect-ratio: 16 / 9; margin-right: calc(-1 * var(--pad)); }
 
 .sh-still img {
   position: absolute;
@@ -904,48 +1037,40 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) brightness(0.36) contrast(1.1);
+  clip-path: polygon(38px 0, 100% 0, 100% 100%, 0 100%);
+  filter: grayscale(1) brightness(0.3) contrast(1.1);
   transition: filter 0.6s;
 }
 
 .sh-order.seen .sh-still img { filter: none; }
-.sh-order.next .sh-still img { filter: grayscale(0.6) brightness(0.6); }
+.sh-order.next .sh-still img { filter: grayscale(0.55) brightness(0.6); }
 
-.sh-still::after {
+.sh-still::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent 55%, rgba(12, 10, 9, 0.75));
+  left: -4px;
+  top: 0;
+  bottom: 0;
+  width: 38px;
+  background: linear-gradient(to bottom right, transparent calc(50% - 1px), var(--sh-gold) 50%, transparent calc(50% + 1px));
+  opacity: 0.75;
   pointer-events: none;
 }
 
-/* кадра нет — приказ без колонки с картинкой */
-.sh-still.none { display: none; }
-.sh-slip:has(> .sh-still.none) { grid-template-columns: minmax(0, 1fr) auto; }
+/* кадра нет — остаётся только место печати */
+.sh-still.none { aspect-ratio: auto; height: 104px; margin-right: 0; }
+.sh-still.none::before { display: none; }
 
-.sh-text { display: flex; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; padding: 14px 8px 15px 18px; }
-
-.sh-kind {
-  font: 700 10.5px/1.2 var(--t-body);
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--sh-gold);
-  opacity: 0.6;
-}
-
-.sh-order:is(.seen, .next) .sh-kind { opacity: 1; }
-.sh-order.next .sh-kind { color: var(--sh-fire); }
-.sh-what { margin: 0; font: 400 17.5px/1.32 var(--t-body); text-wrap: pretty; }
-
-/* место печати */
+/* место печати — на углу кадра */
 .sh-stamp {
-  position: relative;
-  align-self: center;
+  position: absolute;
+  left: -16px;
+  bottom: -46px;
+  z-index: 2;
   display: grid;
   place-items: center;
-  width: 78px;
-  height: 78px;
-  margin: 8px 22px 8px 8px;
+  width: 136px;
+  height: 136px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -957,10 +1082,11 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 .sh-stamp::before {
   content: "";
   position: absolute;
-  inset: 5px;
-  border: 1px dashed color-mix(in srgb, var(--sh-dim) 55%, transparent);
+  inset: 9px;
+  border: 1.5px dashed color-mix(in srgb, var(--sh-dim) 60%, transparent);
   border-radius: 50%;
-  transition: border-color 0.2s, transform 0.3s;
+  background: rgba(12, 10, 9, 0.78);
+  transition: border-color 0.2s, transform 0.3s, opacity 0.2s;
 }
 
 .sh-order.seen .sh-stamp::before { opacity: 0; }
@@ -981,23 +1107,24 @@ button.sh-stamp:focus-visible { outline: 2px solid var(--sh-fire); outline-offse
 }
 
 .sh-ink b {
-  padding: 2px 5px 3px;
+  padding: 3px 8px 4px;
   background: #1a100d;
-  box-shadow: 0 0 0 1.5px var(--sh-blood);
-  font: 700 9px/1 var(--t-body);
+  box-shadow: 0 0 0 2px var(--sh-blood);
+  font: 700 12.5px/1 var(--t-body);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #ff5a4f;
 }
 
-.sh-order.seen .sh-ink { opacity: 0.9; transform: rotate(-11deg); }
+.sh-order.seen .sh-ink { opacity: 0.95; transform: rotate(-11deg); }
 button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 0.4; }
 .sh-order.seen button.sh-stamp:hover .sh-ink, .sh-order.seen button.sh-stamp:focus-visible .sh-ink { opacity: 0.72; }
 
 .sh-do {
   position: relative;
-  font: 700 9.5px/1.25 var(--t-body);
-  letter-spacing: 0.18em;
+  max-width: 96px;
+  font: 700 10.5px/1.3 var(--t-body);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   text-align: center;
   color: var(--sh-dim);
@@ -1007,12 +1134,53 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
 .sh-order.next .sh-do { color: var(--sh-fire); }
 .sh-order.seen .sh-do, button.sh-stamp:hover .sh-do, button.sh-stamp:focus-visible .sh-do { opacity: 0; }
 
-/* возврат назад: приказ «взведён» и ждёт второго нажатия, печати, которые снимутся, мигают */
-.sh-order.armed .sh-ink, .sh-order.armed button.sh-stamp:hover .sh-ink, .sh-order.armed button.sh-stamp:focus-visible .sh-ink { opacity: 0.16; }
-.sh-order.armed .sh-do, .sh-order.armed button.sh-stamp:hover .sh-do, .sh-order.armed button.sh-stamp:focus-visible .sh-do { opacity: 1; color: var(--sh-paper); letter-spacing: 0.1em; }
+/* возврат назад: печать «взведена» и ждёт второго нажатия */
+.sh-order.armed .sh-ink, .sh-order.armed button.sh-stamp:hover .sh-ink, .sh-order.armed button.sh-stamp:focus-visible .sh-ink { opacity: 0.14; }
+.sh-order.armed .sh-do, .sh-order.armed button.sh-stamp:hover .sh-do, .sh-order.armed button.sh-stamp:focus-visible .sh-do { opacity: 1; color: var(--sh-paper); }
 .sh-order.armed .sh-stamp::before { opacity: 1; border-color: var(--sh-fire); border-style: solid; }
-.sh-order.doomed .sh-ink { opacity: 0.4; }
-.sh-order.doomed .sh-slip { filter: saturate(0.4) brightness(0.8); }
+
+.sh-order-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  min-height: 46px;
+  margin-top: 18px;
+  padding-left: 126px;
+  font: italic 400 14px/1.3 var(--t-body);
+  text-align: right;
+  color: var(--sh-dim);
+}
+
+.sh-nav {
+  position: relative;
+  isolation: isolate;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--sh-gold) 70%, transparent);
+  clip-path: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
+  color: var(--sh-gold);
+  font: 400 19px/1 var(--t-body);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sh-nav::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--sh-ink);
+  clip-path: polygon(8.7px 0, 100% 0, calc(100% - 8.7px) 100%, 0 100%);
+}
+
+.sh-nav:hover, .sh-nav:focus-visible { background: var(--sh-paper); color: var(--sh-paper); outline: none; }
+.sh-nav:disabled { opacity: 0.3; cursor: default; background: color-mix(in srgb, var(--sh-gold) 70%, transparent); color: var(--sh-gold); }
 
 /* удар печати: клинок света падает на приказ, печать врезается, летят искры */
 .sh-strike {
@@ -1042,7 +1210,6 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
 }
 
 .sh-order.just .sh-ink { animation: sh-slam 0.44s cubic-bezier(0.2, 1.5, 0.35, 1) 0.14s both; }
-.sh-order.just .sh-slip { animation: sh-jolt 0.36s ease-out 0.16s; }
 
 @keyframes sh-strike {
   0% { opacity: 0; transform: translateY(-150px); }
@@ -1053,13 +1220,7 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
 
 @keyframes sh-slam {
   0% { opacity: 0; transform: rotate(-22deg) scale(1.7); }
-  100% { opacity: 0.9; transform: rotate(-11deg) scale(1); }
-}
-
-@keyframes sh-jolt {
-  0% { transform: translateY(0); filter: brightness(1.7); }
-  30% { transform: translateY(3px); }
-  100% { transform: none; filter: none; }
+  100% { opacity: 0.95; transform: rotate(-11deg) scale(1); }
 }
 
 @keyframes sh-ember {
@@ -1067,27 +1228,40 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
   100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) scale(0.2); }
 }
 
+@keyframes sh-flash {
+  0% { filter: brightness(1.9) drop-shadow(0 0 30px rgba(255, 208, 138, 0.95)); }
+  100% { filter: drop-shadow(0 0 16px rgba(239, 138, 58, 0.5)); }
+}
+
 /* соседние дела */
-.sh-neigh { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 60px; }
+.sh-neigh { grid-area: neigh; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 34px; }
 .sh-neigh a { display: flex; flex-direction: column; gap: 6px; padding: 16px 20px; border-top: 1px solid color-mix(in srgb, var(--sh-gold) 50%, transparent); color: var(--sh-paper); text-decoration: none; transition: background 0.25s; }
 .sh-neigh a:hover, .sh-neigh a:focus-visible { background: color-mix(in srgb, var(--sh-gold) 10%, transparent); outline: none; }
 .sh-neigh a.next { text-align: right; }
 .sh-neigh small { font: 700 10.5px/1 var(--t-body); letter-spacing: 0.24em; text-transform: uppercase; color: var(--sh-gold); }
 .sh-neigh b { font: 700 19px/1.2 var(--t-display); }
 
-/* появление страницы после заставки */
+/* появление после заставки: печать встаёт на место и разгорается от нуля до исполненных приказов */
 @media (prefers-reduced-motion: no-preference) {
-  .sh-page:not(.sh-in) :is(.sh-dossier, .sh-part-head, .sh-order) { opacity: 0; }
-  .sh-page.sh-in .sh-dossier { animation: sh-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-  .sh-page.sh-in .sh-part-head { animation: sh-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both; }
-  .sh-page.sh-in .sh-order { animation: sh-file 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--k) * 45ms + 0.16s) both; }
-  .sh-seal.wait::before { animation: sh-spin 40s linear infinite; }
+  .sh-dial { transition: --sh-fill 0.9s cubic-bezier(0.3, 0.7, 0.2, 1); }
+  .sh-hall:not(.sh-in) .sh-dial { --sh-fill: 0 !important; }
+  .sh-hall:not(.sh-in) :is(.sh-ident, .sh-docket, .sh-order, .sh-dial, .sh-tabs) { opacity: 0; }
+  .sh-hall.sh-in .sh-ident { animation: sh-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .sh-hall.sh-in .sh-docket { animation: sh-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both; }
+  .sh-hall.sh-in .sh-tabs { animation: sh-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both; }
+  .sh-hall.sh-in .sh-dial { animation: sh-seat 1.15s cubic-bezier(0.2, 0.8, 0.2, 1) both; transition: --sh-fill 1.5s cubic-bezier(0.3, 0.6, 0.2, 1) 0.3s; }
+  .sh-hall.sh-in .sh-order { animation: sh-file 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s both; }
+  .sh-order-in.swap > :not(.sh-order-no) { animation: sh-rise 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .sh-order-in.swap .sh-order-no { animation: sh-file 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .sh-dial.flash .sh-dial-ring.lit { animation: sh-flash 0.8s ease-out; }
   .sh-order.next .sh-stamp::before { animation: sh-pulse 1.8s ease-in-out infinite; }
+  .sh-center-cta { animation: sh-pulse 1.8s ease-in-out infinite; }
 }
 
 @keyframes sh-rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
 @keyframes sh-file { from { opacity: 0; transform: translateX(34px); } to { opacity: 1; transform: none; } }
-@keyframes sh-pulse { 50% { box-shadow: 0 0 16px 2px color-mix(in srgb, var(--sh-fire) 60%, transparent); } }
+@keyframes sh-seat { from { opacity: 0; scale: 0.84; rotate: -26deg; } to { opacity: 1; scale: 1; rotate: 0deg; } }
+@keyframes sh-pulse { 50% { box-shadow: 0 0 18px 3px color-mix(in srgb, var(--sh-fire) 60%, transparent); } }
 
 /* ---------------------------------------------------------- трибунал --- */
 
@@ -1367,37 +1541,52 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
 
 /* ----------------------------------------------------- узкие экраны --- */
 
+/* ноутбук: боковые колонки уже, печать остаётся крупной */
+@media (max-width: 1360px) {
+  .sh-hall { grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) minmax(280px, 350px); }
+  .sh-dial { width: min(calc(100% - 108px), 74vh, 680px); }
+}
+
+/* планшет и телефон: всё в одну колонку — имя, печать, выбранный приказ, дело */
 @media (max-width: 1020px) {
-  .sh-page { grid-template-columns: minmax(0, 1fr); gap: 34px; padding-top: 16px; }
-  .sh-dossier { position: relative; top: 0; height: auto; min-height: 0; }
-  .sh-portrait { flex: none; height: min(96vw, 520px); }
-  .sh-portrait > img { object-position: 50% 24%; }
+  .sh-hall {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "ident" "seat" "order" "docket" "neigh";
+    row-gap: 26px;
+    min-height: 0;
+    padding-bottom: 70px;
+  }
+
+  .sh-ident { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+  .sh-back { flex: 0 0 auto; margin: 0 100% 6px 0; }
+  .sh-ident img { flex: 0 0 auto; width: 46%; max-width: 220px; }
+  .sh-name { flex: 1 1 120px; font-size: 11.5px; letter-spacing: 0.16em; }
+  .sh-unit { flex: 1 1 100%; }
+  .sh-dial { width: min(calc(100% - 70px), 460px); margin: 9% 0 8%; }
+  .sh-wn { font-size: 8.4px; }
+  .sh-wn.sel { font-size: 11px; }
+  .sh-order { align-self: start; }
+  /* на телефоне номер приказа — водяной знак за названием, а не над ним: выше стоит печать */
+  .sh-order-no { top: -0.16em; font-size: 104px; }
+  .sh-what { min-height: 0; }
+  .sh-still { margin-right: 0; }
+  .sh-docket { align-self: start; }
 }
 
 @media (max-width: 620px) {
-  .sh-served-num b { font-size: 62px; }
-  .sh-order { grid-template-columns: 34px minmax(0, 1fr); }
-  .sh-order::before { left: 6px; }
-  .sh-no { width: 34px; height: 28px; font-size: 14px; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); }
-  .sh-slip { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 96px auto; }
-  .sh-still { grid-column: 1 / -1; }
-  .sh-still::after { background: linear-gradient(180deg, transparent 50%, rgba(12, 10, 9, 0.7)); }
-  /* неисполненные приказы на телефоне — без кадра: список короче, и спойлеров меньше */
-  .sh-order:not(.seen, .next) .sh-slip { grid-template-rows: auto; }
-  .sh-order:not(.seen, .next) .sh-still { display: none; }
-  .sh-text { padding: 12px 12px 14px 16px; }
-  .sh-do { font-size: 8.5px; letter-spacing: 0.06em; }
-  .sh-slip:has(> .sh-still.none) { grid-template-rows: auto; }
-  .sh-what { font-size: 16px; }
-  .sh-stamp { width: 74px; height: 74px; margin: 6px 10px 6px 0; }
-  .sh-ink b { font-size: 8px; letter-spacing: 0.12em; }
+  .sh-stamp { left: -10px; bottom: -40px; width: 118px; height: 118px; }
+  .sh-ink b { font-size: 11px; }
+  .sh-do { font-size: 9.5px; max-width: 84px; }
+  .sh-order-nav { padding-left: 110px; font-size: 13px; gap: 10px; }
   .sh-neigh { grid-template-columns: 1fr; }
   .sh-neigh a.next { text-align: left; }
   .sh-trib-in { padding: 34px 24px 30px; }
   .sh-trib-title { font-size: 12px; letter-spacing: 0.3em; }
   .sh-opt { font-size: 16px; padding: 12px 18px 13px 0; grid-template-columns: 36px minmax(0, 1fr); }
+  .sh-opt[aria-pressed] { padding-right: 46px; }
+  .sh-opt[aria-pressed]::after { right: 18px; }
   .sh-keys { display: none; }
   .sh-q-no { font-size: 96px; top: 14px; }
-  .sh-dossier .sh-seal.hi { width: 140px; height: 140px; }
   .sh-trib-foot .sh-btn { padding: 12px 20px; font-size: 11.5px; }
 }

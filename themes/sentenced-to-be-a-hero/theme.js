@@ -1,6 +1,7 @@
 // Приговорённый быть героем — «Тюремные записи штрафного отряда героев 9004».
-// Страница — дело осуждённого: серии — приказы о наказании (так они названы в самом сериале),
-// отметка — печать «исполнено», опросник — трибунал, оценка — приговор.
+// Страница — зал приговора: в центре пламенная печать (священные печати из мира сериала), по её окружности —
+// приказы о наказании (так серии названы в самом сериале). Исполненные приказы горят, в середине печати —
+// приговор. Отметка серии — печать «исполнено», опросник — трибунал, оценка — приговор.
 (() => {
   "use strict";
 
@@ -8,6 +9,10 @@
   const SEEN_KEY = "sh-intro"; // заставка в этой вкладке уже игралась — повторно играть короче
   const DRAFT_KEY = "sh-draft"; // незаконченное заседание трибунала (ответы до приговора)
   const BANDS = 8;
+  const R_IN = 54; // кольцо печати в единицах SVG: внутренний и внешний радиус сектора приказа
+  const R_OUT = 100;
+  const R_NUM = 111; // номера приказов — снаружи, как на циферблате
+  const MAX_WEDGES = 40; // больше — сектора слишком узкие: остаётся кольцо и листание в панели
 
   const isUrl = (u) => typeof u === "string" && /^https?:\/\//i.test(u);
   const pad = (n) => String(n).padStart(2, "0");
@@ -59,6 +64,20 @@
       return [title.slice(0, i).trim(), what.charAt(0).toUpperCase() + what.slice(1)];
     }
     return ["", title];
+  }
+
+  // Сектор кольца для приказа i из n (отсчёт сверху по часовой стрелке).
+  const polar = (r, deg) => {
+    const a = (deg * Math.PI) / 180;
+    return [r * Math.cos(a), r * Math.sin(a)];
+  };
+  function wedgePath(i, n) {
+    const sweep = n === 1 ? 359.99 : 360 / n;
+    const a0 = -90 + (i * 360) / n;
+    const a1 = a0 + sweep;
+    const big = sweep > 180 ? 1 : 0;
+    const f = (r, a) => polar(r, a).map((v) => v.toFixed(2)).join(" ");
+    return `M${f(R_OUT, a0)}A${R_OUT} ${R_OUT} 0 ${big} 1 ${f(R_OUT, a1)}L${f(R_IN, a1)}A${R_IN} ${R_IN} 0 ${big} 0 ${f(R_IN, a0)}Z`;
   }
 
   // Слой заставки: полосы-разрезы, под названием — арт дела, само название в двойной золотой рамке.
@@ -182,42 +201,9 @@
         stageLayer()?.classList.remove("sh-drop");
       });
 
+      const parts0 = ctx.parts();
+      const many = parts0.length > 1;
       const dossier = isUrl(item.images?.dossier) ? `<img src="${esc(item.images.dossier)}" alt="" decoding="async">` : ctx.art.cover('alt="" decoding="async"');
-
-      // --- приказы ---
-      let k = 0;
-      const partsHtml = ctx
-        .parts()
-        .map((part, pi, all) => {
-          const orders = part.episodes
-            .map((ep) => {
-              const [kind, what] = splitOrder(ep.title || `${ep.n} ${ctx.unitWord(part.unit, 1)}`);
-              const still = ep.image
-                ? `<div class="sh-still"><img src="${esc(ep.image)}" alt="" loading="lazy" decoding="async" data-caption="${esc(ep.title)}"></div>`
-                : `<div class="sh-still none"></div>`;
-              const inner = `<span class="sh-ink"><b>исполнено</b></span><span class="sh-do"></span>`;
-              const stamp = edit ? `<button type="button" class="sh-stamp" data-part="${esc(part.id)}" data-n="${ep.n}">${inner}</button>` : `<div class="sh-stamp">${inner}</div>`;
-              return `
-                <li class="sh-order" data-part="${esc(part.id)}" data-n="${ep.n}" style="--k:${Math.min(k++, 14)}">
-                  <span class="sh-no" aria-hidden="true">${pad(ep.n)}</span>
-                  <div class="sh-slip">
-                    ${still}
-                    <div class="sh-text">
-                      ${kind ? `<span class="sh-kind">${esc(kind)}</span>` : ""}
-                      <p class="sh-what"><span class="sr-only">Приказ ${ep.n}. </span>${esc(what)}</p>
-                    </div>
-                    ${stamp}
-                  </div>
-                </li>`;
-            })
-            .join("");
-          return `
-            <section class="sh-part" data-part="${esc(part.id)}">
-              <h2 class="sh-part-head"><span>${esc(part.title || "Приказы")}</span><small>штрафной отряд 9004 · приказы</small>${all.length > 1 ? `<i data-count></i>` : ""}</h2>
-              <ol class="sh-orders" data-gallery>${orders}</ol>
-            </section>`;
-        })
-        .join("");
 
       const { prev, next } = ctx.neighbors;
       const neigh =
@@ -227,34 +213,52 @@
                ${next ? `<a class="next" href="${esc(next.href)}"><small>Следующее дело →</small><b>${esc(next.title)}</b></a>` : "<span></span>"}
              </nav>`
           : "";
+      const tabs = many
+        ? `<div class="sh-tabs" role="tablist" aria-label="Части">${parts0
+            .map((p) => `<button type="button" class="sh-tab" role="tab" data-part="${esc(p.id)}">${esc(p.title || p.id)}<small></small></button>`)
+            .join("")}</div>`
+        : "";
 
       root.innerHTML = `
         <div class="sh-bg" aria-hidden="true"></div>
-        <div class="sh-page">
-          <aside class="sh-dossier">
+        <div class="sh-hall">
+          <header class="sh-ident">
             <a class="sh-back" href="#/">← К списку</a>
-            <div class="sh-portrait">
-              ${dossier}
-              <div class="sh-ident">
-                ${ctx.art.logo('alt=""')}
-                <h1 class="sh-name">${esc(item.title)}</h1>
-              </div>
+            ${ctx.art.logo('alt=""')}
+            <h1 class="sh-name">${esc(item.title)}</h1>
+            <p class="sh-unit">Штрафной отряд 9004 · тюремные записи</p>
+          </header>
+          <section class="sh-seat" aria-label="Печать приговора">
+            ${tabs}
+            <div class="sh-dial">
+              <i class="sh-chain a" aria-hidden="true"></i><i class="sh-chain b" aria-hidden="true"></i>
+              <div class="sh-dial-core" aria-hidden="true">${dossier}</div>
+              <div class="sh-dial-ring dim" aria-hidden="true"></div>
+              <div class="sh-dial-ring lit" aria-hidden="true"></div>
+              <div class="sh-dial-gaps" aria-hidden="true"></div>
+              <svg class="sh-dial-svg" viewBox="-124 -124 248 248" role="group" aria-label="Приказы по кругу печати"></svg>
+              <div class="sh-dial-center"></div>
             </div>
+          </section>
+          <section class="sh-order" aria-label="Выбранный приказ"></section>
+          <aside class="sh-docket">
             <section class="sh-served" aria-label="Прогресс"></section>
             <section class="sh-verdict" aria-label="Приговор"></section>
             <p class="sr-only" aria-live="polite" data-say></p>
           </aside>
-          <div class="sh-ledger">${partsHtml}${neigh}</div>
+          ${neigh}
         </div>
         <dialog class="sh-trib" aria-label="Трибунал"></dialog>`;
 
-      const page = root.querySelector(".sh-page");
-      const dossierEl = root.querySelector(".sh-dossier");
+      const hall = root.querySelector(".sh-hall");
+      const dial = root.querySelector(".sh-dial");
+      const svg = root.querySelector(".sh-dial-svg");
+      const center = root.querySelector(".sh-dial-center");
+      const order = root.querySelector(".sh-order");
       const served = root.querySelector(".sh-served");
       const verdict = root.querySelector(".sh-verdict");
       const say = root.querySelector("[data-say]");
       const dlg = root.querySelector(".sh-trib");
-      const orderEls = [...root.querySelectorAll(".sh-order")];
 
       // --- трибунал: состояние заседания (нужно и блоку приговора) ---
       const trib = { answers: {}, i: 0, done: false, draft: false };
@@ -273,180 +277,347 @@
         session.set(DRAFT_KEY, null);
       };
 
-      // --- счёт приказов ---
+      // --- выбранный приказ: с него начинается страница ---
+      // Смотрит дальше — выбран следующий приказ (его и отмечать); досмотрел — последний.
+      const p0 = ctx.progress();
+      const start = p0.next ?? p0.last;
+      const sel = { part: start?.part.id ?? p0.parts[0]?.id ?? "", n: start?.n ?? 1 };
+      const partOf = (id = sel.part) => ctx.parts().find((x) => x.id === id) ?? ctx.parts()[0];
+      const seenSet = () => {
+        const out = new Set();
+        for (const p of ctx.progress().parts) for (let n = 1; n <= p.watched; n++) out.add(`${p.id}:${n}`);
+        return out;
+      };
+      let known = seenSet();
+      // Возврат назад снимает сразу несколько печатей — такое нажатие сначала «взводится» и ждёт второго.
+      let armed = null; // { part, n, timer }
+
+      // --- кольцо печати ---
+      function buildDial() {
+        const part = partOf();
+        const n = part?.count ?? 0;
+        dial.style.setProperty("--n", String(Math.max(1, n)));
+        dial.classList.toggle("dense", n > MAX_WEDGES);
+        if (!part || n < 1 || n > MAX_WEDGES) return void (svg.innerHTML = "");
+        const every = n > 24 ? 2 : 1;
+        svg.innerHTML = part.episodes
+          .map((ep, i) => {
+            const [x, y] = polar(R_NUM, -90 + ((i + 0.5) * 360) / n);
+            const num = i % every === 0 ? `<text class="sh-wn" data-n="${ep.n}" x="${x.toFixed(2)}" y="${y.toFixed(2)}">${ep.n}</text>` : "";
+            return `<path class="sh-w" d="${wedgePath(i, n)}" data-n="${ep.n}" role="button" tabindex="-1"></path>${num}`;
+          })
+          .join("");
+      }
+
+      function renderCenter() {
+        const p = ctx.progress();
+        const part = p.parts.find((x) => x.id === sel.part) ?? p.parts[0];
+        const st = ctx.quizState();
+        const judged = !!st && st.score != null;
+        const canJudge = edit && !!quiz?.questions?.length && p.status === "completed";
+        let inner;
+        if (judged) {
+          inner = `<span class="sh-score ${tier(st.score)}" role="img" aria-label="Оценка ${ctx.fmtScore(st.score)} из 10"><b>${ctx.fmtScore(st.score)}</b><i>из 10</i></span>`;
+        } else {
+          const done = many ? part.watched : p.watched;
+          const total = many ? part.count : p.total;
+          inner = `<span class="sh-count"><b>${done}</b><i>/ ${total}</i></span>
+            <span class="sh-count-label">${ctx.plural(done, "приказ исполнен", "приказа исполнено", "приказов исполнено")}</span>`;
+        }
+        center.innerHTML =
+          canJudge && !judged
+            ? `<button type="button" class="sh-center-btn" data-act="tribunal">${inner}<span class="sh-center-cta">${trib.draft ? "продолжить заседание" : "созвать трибунал"}</span></button>`
+            : inner;
+        hall.classList.toggle("judged", judged);
+        for (const t of ["hi", "mid", "lo"]) hall.classList.toggle(`tier-${t}`, judged && tier(st.score) === t);
+      }
+
+      function syncDial() {
+        const p = ctx.progress();
+        const part = p.parts.find((x) => x.id === sel.part) ?? p.parts[0];
+        if (!part) return;
+        const eps = partOf()?.episodes ?? [];
+        dial.style.setProperty("--sh-fill", part.count ? (part.watched / part.count).toFixed(4) : "0");
+        const mark = (el, n) => {
+          const isNext = !!p.next && p.next.part.id === part.id && p.next.n === n;
+          el.classList.toggle("seen", n <= part.watched);
+          el.classList.toggle("next", isNext);
+          el.classList.toggle("sel", n === sel.n);
+          el.classList.toggle("doomed", !!armed && armed.part === part.id && n > armed.n && n <= part.watched);
+        };
+        for (const w of svg.querySelectorAll(".sh-w")) {
+          const n = Number(w.dataset.n);
+          mark(w, n);
+          w.setAttribute("tabindex", n === sel.n ? "0" : "-1");
+          const title = eps[n - 1]?.title;
+          w.setAttribute("aria-label", `Приказ ${n}${title ? `: ${title}` : ""} — ${n <= part.watched ? "исполнен" : "не исполнен"}`);
+          w.setAttribute("aria-current", String(n === sel.n));
+        }
+        for (const t of svg.querySelectorAll(".sh-wn")) mark(t, Number(t.dataset.n));
+        for (const tab of root.querySelectorAll(".sh-tab")) {
+          const tp = p.parts.find((x) => x.id === tab.dataset.part);
+          tab.setAttribute("aria-selected", String(tab.dataset.part === sel.part));
+          if (tp) tab.querySelector("small").textContent = `${tp.watched}/${tp.count}`;
+        }
+        renderCenter();
+      }
+
+      // --- панель выбранного приказа ---
+      function drawOrder(swap) {
+        const part = partOf();
+        const ep = part?.episodes[sel.n - 1];
+        if (!ep) return void (order.innerHTML = "");
+        const [kind, what] = splitOrder(ep.title || `${ep.n} ${ctx.unitWord(part.unit, 1)}`);
+        const inner = `<span class="sh-ink"><b>исполнено</b></span><span class="sh-do"></span>`;
+        const stamp = edit ? `<button type="button" class="sh-stamp" data-act="stamp">${inner}</button>` : `<div class="sh-stamp">${inner}</div>`;
+        order.innerHTML = `
+          <div class="sh-order-in ${swap ? "swap" : ""}">
+            <span class="sh-order-no" aria-hidden="true">${pad(ep.n)}</span>
+            <p class="sh-kind">${esc(kind || "Приказ")}</p>
+            <h2 class="sh-what"><span class="sr-only">Приказ ${ep.n}. </span>${esc(what)}</h2>
+            <div class="sh-still ${ep.image ? "" : "none"}" data-gallery>
+              ${ep.image ? `<img src="${esc(ep.image)}" alt="" decoding="async" data-caption="${esc(ep.title)}">` : ""}
+              ${stamp}
+            </div>
+            <nav class="sh-order-nav" aria-label="Листать приказы">
+              <button type="button" class="sh-nav" data-act="back" ${ep.n > 1 ? "" : "disabled"} aria-label="Предыдущий приказ">←</button>
+              <span>${many && part.title ? `${esc(part.title)} · ` : ""}приказ ${ep.n} из ${part.count}</span>
+              <button type="button" class="sh-nav" data-act="fwd" ${ep.n < part.count ? "" : "disabled"} aria-label="Следующий приказ">→</button>
+            </nav>
+          </div>`;
+        syncOrder();
+      }
+
+      // Панель перерисовывается целиком: если фокус был на её кнопке, возвращаем его на ту же кнопку.
+      function redrawOrder(swap) {
+        const act = order.contains(document.activeElement) ? document.activeElement.dataset?.act : null;
+        drawOrder(swap);
+        if (act) (order.querySelector(`[data-act="${act}"]:not(:disabled)`) ?? order.querySelector('[data-act="stamp"], .sh-nav:not(:disabled)'))?.focus({ preventScroll: true });
+      }
+
+      function syncOrder() {
+        const p = ctx.progress();
+        const part = p.parts.find((x) => x.id === sel.part);
+        if (!part || !order.firstElementChild) return;
+        const n = sel.n;
+        const cur = part.watched;
+        const seen = n <= cur;
+        const isNext = !!p.next && p.next.part.id === part.id && p.next.n === n;
+        const isArmed = !!armed && armed.part === part.id && armed.n === n;
+        order.classList.toggle("seen", seen);
+        order.classList.toggle("next", isNext);
+        order.classList.toggle("armed", isArmed);
+        if (!seen) order.classList.remove("just");
+        const drop = cur - n;
+        order.querySelector(".sh-do").textContent = isArmed
+          ? `снять ${drop} ${ctx.plural(drop, "печать", "печати", "печатей")}?`
+          : seen
+            ? ""
+            : isNext
+              ? edit ? "исполнить" : "следующий"
+              : edit ? `исполнено по № ${n}` : "не исполнен";
+        const btn = order.querySelector("button.sh-stamp");
+        if (btn) {
+          btn.setAttribute("aria-pressed", String(seen));
+          btn.setAttribute(
+            "aria-label",
+            isArmed
+              ? `Подтвердить: снять ${drop} ${ctx.plural(drop, "печать", "печати", "печатей")} и остановиться на приказе ${n}`
+              : n === cur
+                ? `Приказ ${n} исполнен. Снять с него печать`
+                : seen
+                  ? `Приказ ${n} исполнен. Вернуться: остановился на нём`
+                  : `Отметить: остановился на приказе ${n}`,
+          );
+        }
+        // кадр серии открывается в полный размер только у исполненных — чтобы не ловить спойлеры
+        order.querySelector(".sh-still img")?.toggleAttribute("data-zoom", seen);
+      }
+
+      // --- дело: счёт приказов и приговор ---
       function renderServed() {
         const p = ctx.progress();
-        const label = ctx.plural(p.watched, "приказ исполнен", "приказа исполнено", "приказов исполнено");
-        const many = p.parts.length > 1;
         const where = p.last ? `Последний исполненный — <b>${many && p.last.part.title ? `${esc(p.last.part.title)}, ` : ""}приказ № ${p.last.n}</b>` : "Ни один приказ ещё не исполнен";
         const nextBtn = edit && p.next ? `<button type="button" class="sh-btn" data-act="next">Исполнить приказ № ${p.next.n}</button>` : "";
         served.innerHTML = `
-          <div class="sh-served-num"><b>${p.watched}</b><span>/ ${p.total}</span></div>
-          <div class="sh-served-label">${label}</div>
           ${tallyHtml(p.watched, p.total)}
+          <p class="sh-served-line"><b>${p.watched}</b> из ${p.total} ${ctx.plural(p.total, "приказа", "приказов", "приказов")} исполнено</p>
           ${p.status === "completed" ? "" : `<p class="sh-where">${where}</p>`}
           ${nextBtn}`;
       }
 
-      // --- приговор ---
       function renderVerdict() {
         const p = ctx.progress();
         const st = ctx.quizState();
         const judged = !!st && st.score != null;
-        dossierEl.classList.toggle("judged", judged);
         if (!quiz?.questions?.length) return void (verdict.innerHTML = "");
         if (judged) {
           verdict.innerHTML = `
-            <div class="sh-seal ${tier(st.score)}" role="img" aria-label="Оценка ${ctx.fmtScore(st.score)} из 10"><b>${ctx.fmtScore(st.score)}</b></div>
             <div class="sh-verdict-kicker">Приговор трибунала</div>
             <div class="sh-verdict-label">${esc(st.verdict?.label ?? "Вынесен")}</div>
             <div class="sh-verdict-text">${esc(st.verdict?.text ?? "")}</div>
             ${edit && p.status === "completed" ? `<button type="button" class="sh-btn line" data-act="tribunal">${trib.draft ? "Продолжить заседание" : "Обжаловать приговор"}</button>` : ""}`;
         } else if (p.status === "completed" && edit) {
           verdict.innerHTML = `
-            <div class="sh-seal wait" aria-hidden="true"></div>
             <div class="sh-verdict-kicker">Все приказы исполнены</div>
             <div class="sh-verdict-label">Дело ждёт приговора</div>
             <div class="sh-verdict-text">${quiz.questions.length} ${ctx.plural(quiz.questions.length, "вопрос", "вопроса", "вопросов")} — и оценка от 0 до 10.</div>
             <button type="button" class="sh-btn fire" data-act="tribunal">${trib.draft ? "Продолжить заседание" : "Созвать трибунал"}</button>`;
         } else if (p.status !== "completed") {
-          verdict.innerHTML = `
-            <div class="sh-seal wait" aria-hidden="true"></div>
-            <div class="sh-verdict-note">Трибунал соберётся, когда будут исполнены все приказы.</div>`;
+          verdict.innerHTML = `<div class="sh-verdict-note">Трибунал соберётся, когда будут исполнены все приказы.</div>`;
         } else {
           // всё исполнено, но этот браузер не подключён: заседание открыть некому
-          verdict.innerHTML = `
-            <div class="sh-seal wait" aria-hidden="true"></div>
-            <div class="sh-verdict-note">Приговор ещё не вынесен. Созвать трибунал можно из браузера, в котором подключены отметки, — кнопка на главной.</div>`;
+          verdict.innerHTML = `<div class="sh-verdict-note">Приговор ещё не вынесен. Созвать трибунал можно из браузера, в котором подключены отметки, — кнопка на главной.</div>`;
         }
       }
 
-      // --- печати на приказах ---
-      let known = null; // что было отмечено при прошлой отрисовке: «часть:номер»
-      // Возврат назад снимает сразу несколько печатей — такой клик сначала только «взводится» и ждёт второго.
-      let armed = null; // { part, n, timer }
+      function syncAll() {
+        renderServed();
+        renderVerdict();
+        syncDial();
+        syncOrder();
+      }
 
-      function showArmed() {
-        const cur = armed ? (ctx.progress().parts.find((x) => x.id === armed.part)?.watched ?? 0) : 0;
-        for (const el of orderEls) {
-          const n = Number(el.dataset.n);
-          const mine = !!armed && el.dataset.part === armed.part;
-          el.classList.toggle("armed", mine && n === armed.n);
-          el.classList.toggle("doomed", mine && n > armed.n && n <= cur);
-          if (mine && n === armed.n) {
-            const drop = cur - armed.n;
-            el.querySelector(".sh-do").textContent = `снять ${drop} ${ctx.plural(drop, "печать", "печати", "печатей")}?`;
-          }
+      // Выбрать приказ: кольцо подсвечивает сектор, панель справа показывает его.
+      function select(partId, n, focus = false) {
+        const changedPart = partId !== sel.part;
+        const part = partOf(partId);
+        if (!part) return;
+        if (armed) {
+          cancel(armed.timer);
+          armed = null;
         }
+        sel.part = part.id;
+        sel.n = clamp(n, 1, Math.max(1, part.count));
+        if (changedPart) buildDial();
+        redrawOrder(true);
+        syncDial();
+        if (focus) svg.querySelector(`.sh-w[data-n="${sel.n}"]`)?.focus({ preventScroll: true });
       }
 
       function disarm() {
         if (!armed) return;
         cancel(armed.timer);
         armed = null;
-        renderOrders(false);
+        syncDial();
+        syncOrder();
       }
 
-      function renderOrders(animate) {
-        const p = ctx.progress();
-        const watched = new Map(p.parts.map((x) => [x.id, x.watched]));
-        const seenNow = new Set();
-        const fresh = [];
-        for (const el of orderEls) {
-          const part = el.dataset.part;
-          const n = Number(el.dataset.n);
-          const cur = watched.get(part) ?? 0;
-          const seen = n <= cur;
-          const isNext = !!p.next && p.next.part.id === part && p.next.n === n;
-          if (seen) seenNow.add(`${part}:${n}`);
-          if (seen && known && !known.has(`${part}:${n}`)) fresh.push(el);
-          el.classList.toggle("seen", seen);
-          el.classList.toggle("next", isNext);
-          if (!seen) el.classList.remove("just");
-          const btn = el.querySelector(".sh-stamp");
-          el.querySelector(".sh-do").textContent = seen ? "" : isNext ? (edit ? "исполнить" : "следующий") : edit ? `по № ${n}` : "";
-          if (btn.tagName === "BUTTON") {
-            btn.setAttribute("aria-pressed", String(seen));
-            btn.setAttribute(
-              "aria-label",
-              n === cur ? `Приказ ${n} исполнен. Снять с него печать` : seen ? `Приказ ${n} исполнен. Вернуться: остановился на нём` : `Отметить: остановился на приказе ${n}`,
-            );
+      // Печать на выбранном приказе: «остановился на нём». По последнему исполненному — снять одну печать;
+      // по более раннему — возврат: снимет несколько печатей, поэтому просит подтверждения вторым нажатием.
+      function stampAction() {
+        if (!edit) return;
+        const cur = ctx.progress().parts.find((x) => x.id === sel.part)?.watched ?? 0;
+        const n = sel.n;
+        if (n < cur) {
+          if (armed && armed.part === sel.part && armed.n === n) {
+            cancel(armed.timer);
+            armed = null;
+            return ctx.setWatched(sel.part, n);
           }
-          // кадр серии открывается в полный размер только у исполненных — чтобы не ловить спойлеры
-          const img = el.querySelector(".sh-still img");
-          if (img) img.toggleAttribute("data-zoom", seen);
+          if (armed) cancel(armed.timer);
+          armed = { part: sel.part, n, timer: later(disarm, 4500) };
+          syncDial();
+          syncOrder();
+          const drop = cur - n;
+          say.textContent = `Снять ${drop} ${ctx.plural(drop, "печать", "печати", "печатей")} и остановиться на приказе ${n}? Нажми ещё раз, чтобы подтвердить.`;
+          return;
         }
-        for (const sec of root.querySelectorAll(".sh-part")) {
-          const part = p.parts.find((x) => x.id === sec.dataset.part);
-          const count = sec.querySelector("[data-count]");
-          if (part && count) count.textContent = `${part.watched} / ${part.count}`;
-        }
-        if (animate && !ctx.reducedMotion) fresh.slice(-6).forEach((el, i) => later(() => strike(el), i * 90));
-        known = seenNow;
-        showArmed();
+        disarm();
+        ctx.setWatched(sel.part, n === cur ? n - 1 : n);
       }
 
-      // Удар: клинок света падает на приказ, печать врезается, летят искры.
-      function strike(el) {
-        if (!el.isConnected || !el.classList.contains("seen")) return;
-        el.classList.remove("just");
-        void el.offsetWidth;
-        el.classList.add("just");
-        const spot = el.querySelector(".sh-stamp");
-        spot.insertAdjacentHTML("beforeend", `<span class="sh-strike" aria-hidden="true"></span>${burstHtml()}`);
-        const fx = [...spot.querySelectorAll(".sh-strike, .sh-burst")].slice(-2);
+      // Удар: клинок света падает на приказ в панели и на его сектор в кольце, печать врезается, летят искры.
+      function strike(n) {
+        const stamp = order.querySelector(".sh-stamp");
+        if (stamp && order.classList.contains("seen")) {
+          order.classList.remove("just");
+          void order.offsetWidth;
+          order.classList.add("just");
+          stamp.insertAdjacentHTML("beforeend", `<span class="sh-strike" aria-hidden="true"></span>${burstHtml()}`);
+        }
+        const count = partOf()?.count ?? 0;
+        if (count) dial.insertAdjacentHTML("beforeend", `<span class="sh-dial-strike" style="--a:${(((n - 0.5) * 360) / count).toFixed(2)}deg" aria-hidden="true"><b></b>${burstHtml()}</span>`);
+        dial.classList.remove("flash");
+        void dial.offsetWidth;
+        dial.classList.add("flash");
         later(() => {
-          fx.forEach((x) => x.remove());
-          el.classList.remove("just");
-        }, 1000);
+          root.querySelectorAll(".sh-strike, .sh-order .sh-burst, .sh-dial-strike").forEach((x) => x.remove());
+          order.classList.remove("just");
+          dial.classList.remove("flash");
+        }, 1100);
       }
 
-      function renderAll(animate) {
-        renderServed();
-        renderVerdict();
-        renderOrders(animate);
-      }
-      renderAll(false);
+      buildDial();
+      drawOrder(false);
+      syncAll();
+
       ctx.onChange(() => {
         // отметка изменилась (здесь или с другого устройства) — взведённый возврат больше не актуален
         if (armed) {
           cancel(armed.timer);
           armed = null;
         }
-        renderAll(true);
+        const now = seenSet();
+        const fresh = [...now].filter((k) => !known.has(k));
+        known = now;
+        if (!fresh.length) return syncAll();
+        // свежая печать: показать этот приказ, ударить — и перейти к следующему
+        const [partId, nStr] = fresh[fresh.length - 1].split(":");
+        const n = Number(nStr);
+        if (partId !== sel.part) {
+          sel.part = partId;
+          buildDial();
+        }
+        sel.n = n;
+        redrawOrder(false);
+        syncAll();
+        if (ctx.reducedMotion) return;
+        strike(n);
+        later(() => {
+          const p = ctx.progress();
+          // фокус идёт за выбором, если он был на кольце
+          if (p.next && sel.part === partId && sel.n === n && !dlg.open) select(p.next.part.id, p.next.n, svg.contains(document.activeElement));
+        }, 1350);
       });
 
       ctx.listen(root, "click", (e) => {
-        const stamp = e.target.closest("button.sh-stamp");
-        if (stamp) {
-          const part = stamp.dataset.part;
-          const n = Number(stamp.dataset.n);
-          const cur = ctx.progress().parts.find((x) => x.id === part)?.watched ?? 0;
-          if (n < cur) {
-            // возврат к приказу n снимет печати с n+1…cur: первый клик взводит, второй — подтверждает
-            if (armed && armed.part === part && armed.n === n) {
-              cancel(armed.timer);
-              armed = null;
-              return ctx.setWatched(part, n);
-            }
-            if (armed) cancel(armed.timer);
-            armed = { part, n, timer: later(disarm, 4500) };
-            renderOrders(false);
-            const drop = cur - n;
-            say.textContent = `Снять ${drop} ${ctx.plural(drop, "печать", "печати", "печатей")} и остановиться на приказе ${n}? Нажми ещё раз, чтобы подтвердить.`;
-            return;
-          }
-          disarm();
-          // печать на приказе n: остановился на нём; повторно по последнему исполненному — снять с него печать
-          return ctx.setWatched(part, n === cur ? n - 1 : n);
+        if (dlg.contains(e.target)) return;
+        const wedge = e.target.closest(".sh-w");
+        if (wedge) return select(sel.part, Number(wedge.dataset.n));
+        const tab = e.target.closest(".sh-tab");
+        if (tab) {
+          const tp = ctx.progress().parts.find((x) => x.id === tab.dataset.part);
+          return tp && select(tp.id, tp.watched < tp.count ? tp.watched + 1 : tp.count);
         }
-        disarm();
         const act = e.target.closest("[data-act]")?.dataset.act;
+        if (act === "stamp") return stampAction();
+        disarm();
+        if (act === "back") select(sel.part, sel.n - 1);
+        if (act === "fwd") select(sel.part, sel.n + 1);
         if (act === "next") {
           ctx.markNext();
           served.querySelector('[data-act="next"]')?.focus();
         }
         if (act === "tribunal") openTribunal();
+      });
+
+      // Кольцо с клавиатуры: стрелки ведут по приказам, Enter или пробел ставят печать.
+      ctx.listen(svg, "keydown", (e) => {
+        if (!e.target.closest?.(".sh-w")) return;
+        const count = partOf()?.count ?? 0;
+        if (!count) return;
+        let n = sel.n;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") n = (n % count) + 1;
+        else if (e.key === "ArrowLeft" || e.key === "ArrowUp") n = ((n - 2 + count) % count) + 1;
+        else if (e.key === "Home") n = 1;
+        else if (e.key === "End") n = count;
+        else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          return stampAction();
+        } else return;
+        e.preventDefault();
+        select(sel.part, n, true);
       });
 
       // ---------------------------------------------------------- трибунал ---
@@ -647,7 +818,8 @@
 
       ctx.listen(dlg, "close", () => {
         trib.done = true;
-        renderVerdict(); // кнопка знает, осталось ли незаконченное заседание
+        renderVerdict(); // кнопки знают, осталось ли незаконченное заседание
+        renderCenter();
         (verdict.querySelector('[data-act="tribunal"]') ?? root.querySelector(".sh-back"))?.focus({ preventScroll: true });
       });
 
@@ -655,7 +827,7 @@
       const handed = ctx.handoff?.layers.find((l) => l.classList.contains("sh-cut")) ?? null;
       if (ctx.reducedMotion) {
         ctx.handoff?.layers.forEach((l) => l.remove());
-        page.classList.add("sh-in");
+        hall.classList.add("sh-in");
         return;
       }
 
@@ -680,7 +852,7 @@
         layer.classList.add("closed");
         void layer.offsetWidth;
         layer.classList.add("opening");
-        page.classList.add("sh-in");
+        hall.classList.add("sh-in"); // печать разгорается от нуля до текущего числа приказов
         later(() => layer.remove(), 1500);
       };
       // название держится на закрытом экране; странице под ним нужно не меньше трети секунды, чтобы собраться
