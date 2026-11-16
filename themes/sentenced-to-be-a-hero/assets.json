@@ -1,0 +1,47 @@
+{
+  "model": "gpt-image-2.5-flare",
+  "assets": [
+    {
+      "name": "sword",
+      "size": "1024x1536",
+      "background": "transparent",
+      "quality": "medium",
+      "max_width": 240,
+      "prompt": "A single holy longsword made entirely of radiant golden-white light, perfectly vertical, blade pointing straight down, centered. Slender double-edged blade with a faint flame-shaped sacred engraving glowing along the fuller, simple straight cross guard and wrapped grip, soft luminous halo around the edges fading smoothly to nothing. Anime fantasy VFX element, clean silhouette. Isolated on a fully transparent background. No hands, no ground, no frame. No text, no letters, no numbers, no characters."
+    },
+    {
+      "name": "seal",
+      "size": "1024x1024",
+      "background": "transparent",
+      "quality": "medium",
+      "max_width": 720,
+      "prompt": "A circular magic sacred seal sigil seen straight on: a wide ring made of flame-shaped calligraphic brush strokes, like burning abstract runes arranged around a circle, in glowing orange with golden-white hot cores, two thin concentric guide circles, small flame tongues licking outward, the center left completely empty. Anime fantasy VFX element. Isolated on a fully transparent background. The glyphs are abstract flame shapes only. No text, no letters, no numbers, no characters."
+    },
+    {
+      "name": "stamp",
+      "size": "1024x1024",
+      "background": "transparent",
+      "quality": "medium",
+      "max_width": 420,
+      "prompt": "A rough round ink stamp impression in deep blood red, seen straight on: thick outer ring and thin inner ring with uneven, patchy, slightly smudged ink, a wide empty band between the rings, and a small simple stylized flame emblem in the exact center. Distressed rubber stamp look with missing flecks of ink. Isolated on a fully transparent background. No text, no letters, no numbers, no characters."
+    },
+    {
+      "name": "paper",
+      "size": "1536x1024",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 1100,
+      "trim": false,
+      "prompt": "Flat seamless texture of dark aged paper from an old military prison ledger: deep charcoal brown with a warm undertone, visible fine fibers, a few faint water stains and soot smudges, very subtle creases, slightly darker scorched edges. Evenly lit from the front, low contrast, no spotlight. No lines, no stamps, no objects. No text, no letters, no numbers, no characters."
+    },
+    {
+      "name": "ground",
+      "size": "1536x1024",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 1500,
+      "trim": false,
+      "prompt": "Dark fantasy anime background art: a wide expanse of cracked scorched black earth seen from a low three-quarter angle, the cracks glowing with blood-red molten light, here and there patches and thin veins of sickly acid-green corruption, drifting embers, a few broken sword blades stuck in the ground far away as tiny silhouettes. Painterly anime background style with fine linework. The upper half of the image fades into pure black. No text, no letters, no numbers, no characters."
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Watch List</title>
+  <meta name="description" content="Мой список аниме, фильмов, сериалов и манги: где остановился и что поставил после просмотра.">
+  <!-- Fandom и другие вики отдают заглушку вместо картинки, если видят чужой Referer -->
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0a0b0f">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=ea971b8797">
+</head>
+<body>
+  <!-- Сцена: за списком включается слой тайтла под курсором; через неё идёт бесшовный вход в тайтл -->
+  <div id="stage" aria-hidden="true"></div>
+
+  <!-- Главная: только поиск и список -->
+  <main id="list-view" class="wrap">
+    <h1 class="sr-only">Watch List</h1>
+    <div class="toolbar">
+      <button class="sync-btn" id="sync-btn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 10.5a3.75 3.75 0 0 1-.5 7.47"/><path d="M12 12.5v7m0 0-2.6-2.6M12 19.5l2.6-2.6"/></svg>
+      </button>
+      <input class="search" id="search" type="search" placeholder="Поиск тайтла…" aria-label="Поиск тайтла" autocomplete="off">
+    </div>
+    <div id="list" class="title-list"></div>
+  </main>
+
+  <article id="title-view" class="title-view" hidden></article>
+
+  <dialog id="lightbox" class="lightbox" aria-label="Просмотр изображения">
+    <button class="lb-btn lb-close" type="button" aria-label="Закрыть">×</button>
+    <button class="lb-btn lb-prev" type="button" aria-label="Предыдущее">‹</button>
+    <figure>
+      <img id="lb-img" alt="">
+      <figcaption id="lb-caption"></figcaption>
+    </figure>
+    <button class="lb-btn lb-next" type="button" aria-label="Следующее">›</button>
+  </dialog>
+
+  <dialog id="sync-dialog" class="sync-dialog" aria-labelledby="sync-title">
+    <div class="sync-head">
+      <h2 id="sync-title">Синхронизация</h2>
+      <button class="sync-close" type="button" aria-label="Закрыть">×</button>
+    </div>
+    <div class="sync-body"></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/fx.js?v=ea971b8797"></script>
+  <script src="assets/store.js?v=ea971b8797"></script>
+  <script src="assets/app.js?v=ea971b8797"></script>
+</body>
+</html>

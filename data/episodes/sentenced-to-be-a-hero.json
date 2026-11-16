@@ -1,0 +1,66 @@
+{
+  "parts": {
+    "s1": [
+      {
+        "n": 1,
+        "title": "Наказание: прикрыть отступление из леса Кувунджи",
+        "image": "https://yushakei-pj.com/episodes/img/1/8.jpg"
+      },
+      {
+        "n": 2,
+        "title": "Наказание: возглавить захват штолен Зеван-Ган, часть 1",
+        "image": "https://yushakei-pj.com/episodes/img/2/1.jpg"
+      },
+      {
+        "n": 3,
+        "title": "Наказание: возглавить захват штолен Зеван-Ган, часть 2",
+        "image": "https://yushakei-pj.com/episodes/img/3/6.jpg"
+      },
+      {
+        "n": 4,
+        "title": "Приказ ожидания: крепость Мьюрид",
+        "image": "https://yushakei-pj.com/episodes/img/4/4.jpg"
+      },
+      {
+        "n": 5,
+        "title": "Наказание: оборона крепости Мьюрид от скверны, часть 1",
+        "image": "https://yushakei-pj.com/episodes/img/5/1.jpg"
+      },
+      {
+        "n": 6,
+        "title": "Наказание: оборона крепости Мьюрид от скверны, часть 2",
+        "image": "https://yushakei-pj.com/episodes/img/6/1.jpg"
+      },
+      {
+        "n": 7,
+        "title": "Наказание: мнимый отпуск в портовом городе Йоф",
+        "image": "https://yushakei-pj.com/episodes/img/7/2.jpg"
+      },
+      {
+        "n": 8,
+        "title": "Наказание: расследование под прикрытием в квартале Содрик, часть 1",
+        "image": "https://yushakei-pj.com/episodes/img/8/1.jpg"
+      },
+      {
+        "n": 9,
+        "title": "Наказание: расследование под прикрытием в квартале Содрик, часть 2",
+        "image": "https://yushakei-pj.com/episodes/img/9/5.jpg"
+      },
+      {
+        "n": 10,
+        "title": "Наказание: эвакуация и спасение в порту Йоф-Чег, часть 1",
+        "image": "https://yushakei-pj.com/episodes/img/10/3.jpg"
+      },
+      {
+        "n": 11,
+        "title": "Наказание: эвакуация и спасение в порту Йоф-Чег, часть 2",
+        "image": "https://yushakei-pj.com/episodes/img/11/4.jpg"
+      },
+      {
+        "n": 12,
+        "title": "Наказание: эвакуация и спасение в порту Йоф-Чег, часть 3",
+        "image": "https://yushakei-pj.com/episodes/img/12/6.jpg"
+      }
+    ]
+  }
+}

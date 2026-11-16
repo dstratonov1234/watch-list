@@ -1,0 +1,76 @@
+{
+  "updated": "2026-11-15",
+  "build": "ea971b8797",
+  "sync": {
+    "repo": "dstratonov1234/watch-list",
+    "branch": "state",
+    "file": "progress.json"
+  },
+  "titles": [
+    {
+      "id": "sentenced-to-be-a-hero",
+      "title": "Приговорённый быть героем",
+      "original": "Yuusha-kei ni Shosu: Choubatsu Yuusha 9004-tai Keimu Kiroku",
+      "aliases": [
+        "Sentenced to Be a Hero",
+        "勇者刑に処す",
+        "Yuusha-kei ni Shosu",
+        "Наказание для храброго героя",
+        "Тюремные записи 9004-го штрафного отряда героев"
+      ],
+      "type": "anime",
+      "added": "2026-11-15",
+      "cover": "https://yushakei-pj.com/assets/img/top/kv04.jpg",
+      "hero": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/167152-6QxZG8Dmf1EL.jpg",
+      "logo": "https://yushakei-pj.com/assets/img/common/logo/logo_yoko.png",
+      "images": {
+        "dossier": "https://yushakei-pj.com/assets/img/top/kv01.jpg"
+      },
+      "parts": [
+        {
+          "id": "s1",
+          "title": "Сезон 1",
+          "unit": "episode",
+          "count": 12
+        }
+      ],
+      "theme": {
+        "bg": "#0c0a09",
+        "surface": "#17120f",
+        "text": "#ece3d0",
+        "accent": "#ef8a3a",
+        "accent2": "#c4a252",
+        "fonts": [
+          "Playfair Display:ital,wght@0,600;0,800;0,900;1,700",
+          "PT Serif:ital,wght@0,400;0,700;1,400"
+        ],
+        "displayFont": "Playfair Display",
+        "headingFont": "Playfair Display",
+        "bodyFont": "PT Serif",
+        "bodySize": 16,
+        "headingWeight": 800,
+        "headingCase": "uppercase",
+        "headingSpacing": "0.14em",
+        "radius": 0,
+        "heroPosition": "center 30%",
+        "particles": {
+          "type": "embers",
+          "color": [
+            "#ef8a3a",
+            "#ffd08a",
+            "#c63a2a"
+          ],
+          "density": 0.5
+        },
+        "textures": [
+          "vignette",
+          "grain"
+        ],
+        "css": true,
+        "js": true
+      },
+      "episodes": true,
+      "quiz": true
+    }
+  ]
+}

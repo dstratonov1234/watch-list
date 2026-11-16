@@ -1,0 +1,10 @@
+.claude/*
+!.claude/launch.json
+!.claude/skills/
+.DS_Store
+Thumbs.db
+
+# секреты никогда не коммитим (репозиторий публичный)
+*.key
+.env
+.env.*
