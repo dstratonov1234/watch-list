@@ -337,10 +337,14 @@
           inner = `<span class="sh-count"><b>${done}</b><i>/ ${total}</i></span>
             <span class="sh-count-label">${ctx.plural(done, "приказ исполнен", "приказа исполнено", "приказов исполнено")}</span>`;
         }
+        // всё исполнено и приговора нет, но браузер не подключён к отметкам: вместо трибунала предлагаем подключить
+        const mustConnect = !edit && !judged && !!quiz?.questions?.length && p.status === "completed" && ctx.canConnect();
         center.innerHTML =
           canJudge && !judged
             ? `<button type="button" class="sh-center-btn" data-act="tribunal">${inner}<span class="sh-center-cta">${trib.draft ? "продолжить заседание" : "созвать трибунал"}</span></button>`
-            : inner;
+            : mustConnect
+              ? `<button type="button" class="sh-center-btn" data-act="connect">${inner}<span class="sh-center-cta">подключить отметки</span></button>`
+              : inner;
         hall.classList.toggle("judged", judged);
         for (const t of ["hi", "mid", "lo"]) hall.classList.toggle(`tier-${t}`, judged && tier(st.score) === t);
       }
@@ -471,7 +475,9 @@
         const done = many ? (part?.watched ?? 0) : p.watched;
         const total = many ? (part?.count ?? 0) : p.total;
         served.innerHTML = tallyHtml(done, total);
-        if (!quiz?.questions?.length) return void (verdict.innerHTML = "");
+        // браузер не подключён: ни печати, ни трибунала — говорим об этом и даём подключить прямо отсюда
+        const connect = !edit && ctx.canConnect() ? `<button type="button" class="sh-link" data-act="connect">подключить отметки</button>` : "";
+        if (!quiz?.questions?.length) return void (verdict.innerHTML = connect);
         if (judged) {
           verdict.innerHTML = `
             <div class="sh-verdict-kicker">Приговор трибунала</div>
@@ -479,7 +485,8 @@
             <div class="sh-verdict-text">${esc(st.verdict?.text ?? "")}</div>
             ${edit && p.status === "completed" ? `<button type="button" class="sh-link" data-act="tribunal">${trib.draft ? "продолжить заседание" : "обжаловать приговор"}</button>` : ""}`;
         } else if (p.status !== "completed") {
-          verdict.innerHTML = ""; // пока приказы не исполнены, под печатью только зарубки
+          // пока приказы не исполнены, под печатью только зарубки; неподключённому браузеру — почему нет печати
+          verdict.innerHTML = connect ? `<div class="sh-verdict-note">Только просмотр: чтобы ставить печати, подключи этот браузер.</div>` : "";
         } else if (edit) {
           verdict.innerHTML = `
             <div class="sh-verdict-kicker">Все приказы исполнены</div>
@@ -487,8 +494,12 @@
             <div class="sh-verdict-text">${quiz.questions.length} ${ctx.plural(quiz.questions.length, "вопрос", "вопроса", "вопросов")} — и оценка от 0 до 10.</div>`;
         } else {
           // всё исполнено, но этот браузер не подключён: заседание открыть некому
-          verdict.innerHTML = `<div class="sh-verdict-note">Приговор ещё не вынесен. Созвать трибунал можно из браузера, в котором подключены отметки, — кнопка на главной.</div>`;
+          verdict.innerHTML = `
+            <div class="sh-verdict-kicker">Все приказы исполнены</div>
+            <div class="sh-verdict-label">Дело ждёт приговора</div>
+            <div class="sh-verdict-text">Трибунал созывают из подключённого браузера: без этого сайт только показывает отметки.</div>`;
         }
+        if (connect) verdict.insertAdjacentHTML("beforeend", connect);
       }
 
       function syncAll() {
@@ -613,6 +624,7 @@
         if (act === "back") select(sel.part, sel.n - 1);
         if (act === "fwd") select(sel.part, sel.n + 1);
         if (act === "tribunal") openTribunal();
+        if (act === "connect") ctx.connect();
       });
 
       // Esc при взведённом возврате отменяет его, а не уводит к списку (движок слушает Esc на документе).

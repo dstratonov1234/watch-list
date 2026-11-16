@@ -423,6 +423,13 @@
       parts: () => partsView(t, extra),
       progress: () => progressOf(t),
       canEdit: () => Store.canEdit(),
+      // Браузер ещё не подключён к отметкам (а сайт это умеет): тема может предложить подключить прямо
+      // со страницы — connect() открывает окно; после подключения страница соберётся заново уже с кнопками.
+      canConnect: () => {
+        const i = Store.info();
+        return i.configured && !i.connected;
+      },
+      connect: () => openSync(),
       setWatched: (partId, n) => setWatched(t, partId, n),
       markNext: () => markNext(t),
       // --- опросник ---
@@ -979,6 +986,7 @@
             </div>
             <p class="where">${p.last ? esc(whereText(p)) : `Ещё не начато`}</p>
             ${edit && p.next ? `<button type="button" class="btn wide" data-act="next">+1 ${unitWord(p.next.part.unit, 1)}</button>` : ""}
+            ${!edit && Store.info().configured ? `<button type="button" class="btn ghost wide" data-act="connect">Подключить отметки</button>` : ""}
             ${p.score != null ? `<div class="side-score"><b>${fmtScore(p.score)}</b><span>/ 10</span></div>` : ""}
             <span class="sr-only">${unitWord(unit, p.total)}</span>
           </div>
@@ -1014,6 +1022,7 @@
     }
     const act = e.target.closest("[data-act]")?.dataset.act;
     if (act === "next") markNext(t);
+    if (act === "connect") openSync();
     if (act === "quiz-open") {
       Object.assign(draft, { open: true, answers: { ...(Store.entry(t.id).q?.a ?? {}) } });
       renderTitle(t, state.extraCache.get(t.id));
@@ -1051,9 +1060,17 @@
 
   let listDirty = false;
 
+  let couldEdit = null; // можно ли было отмечать при прошлом событии (ставится при запуске)
+
   Store.subscribe((kind) => {
     renderSync();
     if (kind !== "change") return;
+    // Браузер подключили или отключили — страницу тайтла собираем заново: на ней появятся (или пропадут)
+    // печати, «+1» и вход в опросник.
+    const can = Store.canEdit();
+    const flipped = couldEdit !== null && can !== couldEdit;
+    couldEdit = can;
+    if (flipped && !els.titleView.hidden && state.current) return void showTitle(state.current);
     if (!els.titleView.hidden && state.current) {
       if (modules.active) {
         for (const fn of [...modules.changeFns]) {
@@ -1101,13 +1118,16 @@
     els.syncBtn.setAttribute("aria-label", `Синхронизация: ${SYNC_LABELS[info.status] ?? ""}`);
     if (info.status === "error" && lastStatus !== "error") toast(`Не удалось сохранить в GitHub: ${info.error}. Отметка осталась в этом браузере.`);
     lastStatus = info.status;
-    if (els.syncDialog.open) fillSyncDialog();
+    // Окно перерисовываем, только когда браузер подключён (там статус) или подключение только что сменилось:
+    // пока в нём поле для токена, любая перерисовка стёрла бы вставленное.
+    if (els.syncDialog.open && (info.connected || els.syncDialog.dataset.connected === "true")) fillSyncDialog();
   }
 
   function fillSyncDialog(msg = "") {
     const info = Store.info();
     const repoUrl = `https://github.com/${info.repo}`;
     const body = els.syncDialog.querySelector(".sync-body");
+    els.syncDialog.dataset.connected = String(info.connected);
     if (info.connected) {
       body.innerHTML = `
         <p class="sync-state ${esc(info.status)}">${esc(SYNC_LABELS[info.status] ?? "")}${info.status === "error" ? `: ${esc(info.error)}` : ""}</p>
@@ -1120,12 +1140,13 @@
       return;
     }
     body.innerHTML = `
-      <p>Сейчас сайт только показывает отметки. Чтобы отмечать серии и проходить опросники, подключи GitHub-токен — он хранится только в этом браузере.</p>
+      <p>Сейчас сайт только показывает отметки. Чтобы отмечать серии и проходить опросники, этому браузеру нужен <b>токен</b> — ключ от твоего репозитория на GitHub: с ним сайт может записывать туда отметки. Его создаёшь ты сам в настройках GitHub, это минута; хранится он только в этом браузере.</p>
       <ol class="sync-steps">
-        <li>Открой <a href="https://github.com/settings/personal-access-tokens/new?name=Watch+List&amp;description=Watch+List+sync&amp;contents=write" target="_blank" rel="noopener">создание токена на GitHub</a> (fine-grained).</li>
-        <li><b>Repository access</b> → Only select repositories → <b>${esc(info.repo.split("/")[1] ?? "")}</b>.</li>
-        <li><b>Permissions</b> → Repository permissions → <b>Contents: Read and write</b>.</li>
-        <li>Создай токен, скопируй и вставь сюда.</li>
+        <li>Войди на GitHub под аккаунтом <b>${esc(info.repo.split("/")[0] ?? "")}</b> и открой <a href="https://github.com/settings/personal-access-tokens/new?name=Watch+List&amp;description=Watch+List+sync&amp;contents=write" target="_blank" rel="noopener">создание токена</a>.</li>
+        <li><b>Token name</b> — любое, например Watch List. <b>Expiration</b> — срок подольше: когда он выйдет, токен нужно будет создать заново.</li>
+        <li><b>Repository access</b> → Only select repositories → выбери <b>${esc(info.repo.split("/")[1] ?? "")}</b>.</li>
+        <li><b>Permissions</b> → Repository permissions → <b>Contents</b> → <b>Read and write</b>.</li>
+        <li>Нажми <b>Generate token</b>, скопируй строку <code>github_pat_…</code> и вставь сюда.</li>
       </ol>
       <form class="sync-form">
         <input type="password" name="token" placeholder="github_pat_…" autocomplete="off" spellcheck="false" aria-label="GitHub-токен" required>
@@ -1134,10 +1155,16 @@
       <p class="sync-msg" role="status">${esc(msg)}</p>`;
   }
 
-  els.syncBtn.addEventListener("click", () => {
+  // Окно подключения открывается и с главной, и со страницы тайтла (ctx.connect в теме).
+  function openSync() {
+    if (!Store.info().configured) return;
     fillSyncDialog();
-    els.syncDialog.showModal();
-  });
+    if (!els.syncDialog.open) els.syncDialog.showModal();
+  }
+
+  els.syncBtn.addEventListener("click", openSync);
+  // Esc закрывает только окно: до документа не пускаем, иначе со страницы тайтла уведёт к списку
+  els.syncDialog.addEventListener("keydown", (e) => e.key === "Escape" && e.stopPropagation());
 
   els.syncDialog.addEventListener("click", (e) => {
     if (e.target === els.syncDialog || e.target.closest(".sync-close")) return els.syncDialog.close();
@@ -1301,6 +1328,7 @@
     // Отметки этого браузера — сразу; свежие из репозитория придут следом и перерисуют список.
     // ?nosync — без репозитория (для проверок в headless Chrome: только отметки этого браузера)
     const ready = Store.init(new URLSearchParams(location.search).has("nosync") ? null : data.sync);
+    couldEdit = Store.canEdit(); // токен из этого браузера уже прочитан
     await Promise.race([ready, new Promise((r) => setTimeout(r, 1500))]);
     renderSync();
     route();

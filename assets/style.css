@@ -1058,6 +1058,7 @@ html.themed .neighbor:hover {
 .sync-body p { margin: 10px 0; color: var(--text-dim); }
 .sync-body b { color: var(--text); }
 .sync-steps { margin: 12px 0; padding-left: 20px; color: var(--text-dim); display: grid; gap: 6px; }
+.sync-steps code { padding: 1px 5px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); font-size: 13px; }
 .sync-form { display: flex; gap: 8px; margin-top: 14px; }
 
 .sync-form input {
