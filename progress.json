@@ -7,8 +7,31 @@
       },
       "wt": 1794795807105,
       "last": "s1",
-      "q": null,
-      "qt": 0
+      "q": {
+        "a": {
+          "after": "c",
+          "fights": "a",
+          "finale": "b",
+          "mureed": "b",
+          "music": "e",
+          "next": "b",
+          "pace": "b",
+          "place": "c",
+          "plot": "b",
+          "teoritta": "b",
+          "tone": "c",
+          "twists": "b",
+          "unit": [
+            "tsav",
+            "rhyno",
+            "kivia",
+            "frenci"
+          ],
+          "xylo": "a"
+        },
+        "s": 7.4
+      },
+      "qt": 1794805763951
     }
   }
 }
