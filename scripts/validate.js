@@ -209,6 +209,35 @@ function checkTheme(t) {
   }
 }
 
+// Серии: порядок просмотра частей (data/franchises.json). Каждый тайтл сайта должен стоять в своей серии —
+// даже если он в ней пока один: по этому файлу проверяется, что смотрим по порядку, и строятся ссылки
+// «следующая часть».
+function checkFranchises(titleIds) {
+  const file = "data/franchises.json";
+  if (!exists(file)) return warn(`${file}: файла нет — у тайтлов не будет ссылок на следующую часть`);
+  const data = readJson(file);
+  if (!data) return;
+  const placed = new Map();
+  for (const [fid, f] of Object.entries(data)) {
+    const at = `${file} → ${fid}`;
+    if (!ID_RE.test(fid)) err(`${at}: id серии должен быть kebab-case латиницей`);
+    if (!f?.title) err(`${at}: нет title`);
+    if (!Array.isArray(f?.entries) || !f.entries.length) {
+      err(`${at}: нужен непустой массив entries`);
+      continue;
+    }
+    f.entries.forEach((e, i) => {
+      if (!e?.title) err(`${at}: у части № ${i + 1} нет title`);
+      if (e?.id == null) return;
+      if (!titleIds.has(e.id)) err(`${at}: часть «${e.title}» ссылается на тайтл «${e.id}», которого нет в titles.json`);
+      if (placed.has(e.id)) err(`${at}: тайтл «${e.id}» уже стоит в серии «${placed.get(e.id)}»`);
+      placed.set(e.id, fid);
+      if (e.released === false) err(`${at}: часть «${e.title}» добавлена на сайт, но помечена released: false`);
+    });
+  }
+  for (const id of titleIds) if (!placed.has(id)) warn(`titles.json → ${id}: не стоит ни в одной серии в ${file} (добавь, даже если часть пока одна)`);
+}
+
 // Ключи и токены не должны попадать в репозиторий (он публичный).
 function scanSecrets() {
   const SECRET = /(sk-[A-Za-z0-9_-]{20,}|github_pat_[A-Za-z0-9_]{20,}|gh[pousr]_[A-Za-z0-9]{30,})/;
@@ -238,6 +267,7 @@ function buildHash() {
     }
   };
   for (const d of ["assets", "themes", "data/episodes", "data/quiz"]) walk(rel(d));
+  if (exists("data/franchises.json")) files.push(rel("data/franchises.json"));
   const h = crypto.createHash("sha1");
   for (const f of files) {
     h.update(path.relative(ROOT, f).replace(/\\/g, "/"));
@@ -276,6 +306,7 @@ async function checkUrls() {
     if (data.sync && !/^[\w.-]+\/[\w.-]+$/.test(data.sync.repo ?? "")) err("titles.json: sync.repo — «владелец/репозиторий»");
     const seen = new Set();
     for (const t of data.titles ?? []) checkTitle(t, seen);
+    checkFranchises(seen);
     for (const dir of ["episodes", "quiz"]) {
       if (!exists("data", dir)) continue;
       for (const f of fs.readdirSync(rel("data", dir))) if (f.endsWith(".json") && !seen.has(f.slice(0, -5))) warn(`data/${dir}/${f}: тайтла с таким id нет`);

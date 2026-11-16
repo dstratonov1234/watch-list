@@ -220,6 +220,17 @@
             .join("")}</div>`
         : "";
 
+      // Порядок просмотра: что перед этой частью и что дальше. Ссылка — только на часть, уже добавленную на сайт.
+      const chain = ctx.chain();
+      const partLink = (x, dir) => {
+        if (!x) return "";
+        const label = dir === "next" ? "дальше по порядку" : "перед этим";
+        return x.href
+          ? `<a class="sh-part-link" href="${esc(x.href)}"><small>${label}</small>${dir === "prev" ? "← " : ""}${esc(x.title)}${dir === "next" ? " →" : ""}</a>`
+          : `<span class="sh-part-link off"><small>${label}</small>${esc(x.title)} — ${x.released ? "ещё не добавлен" : "ещё не вышел"}</span>`;
+      };
+      const partsNav = chain && (chain.prev || chain.next) ? `<nav class="sh-parts" aria-label="Порядок просмотра">${partLink(chain.prev, "prev")}${partLink(chain.next, "next")}</nav>` : "";
+
       // Печать — во всю левую часть экрана, под ней по её оси — зарубки и приговор словами.
       // Справа — имя и выбранный приказ. Действие на экране одно: печать на приказе, а когда всё исполнено —
       // «созвать трибунал» в середине печати.
@@ -231,6 +242,7 @@
             ${ctx.art.logo('alt=""')}
             <h1 class="sh-name">${esc(item.title)}</h1>
             <p class="sh-unit">Штрафной отряд 9004 · тюремные записи</p>
+            ${partsNav}
           </header>
           <section class="sh-seat" aria-label="Печать приговора">
             ${tabs}

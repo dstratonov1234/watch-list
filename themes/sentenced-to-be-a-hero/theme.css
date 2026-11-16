@@ -637,6 +637,26 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   color: var(--sh-gold);
 }
 
+/* порядок просмотра: что перед этой частью и что дальше */
+.sh-parts { display: grid; gap: 6px; align-self: stretch; }
+
+.sh-part-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font: 700 12px/1.4 var(--t-body);
+  letter-spacing: 0.08em;
+  color: var(--sh-paper);
+  text-decoration: none;
+}
+
+.sh-part-link small { font: 700 9.5px/1.4 var(--t-body); letter-spacing: 0.24em; text-transform: uppercase; color: var(--sh-gold); }
+a.sh-part-link { transition: color 0.2s, padding 0.25s; }
+a.sh-part-link:hover, a.sh-part-link:focus-visible { padding-left: 6px; color: #ffd08a; outline: none; }
+a.sh-part-link:focus-visible { box-shadow: 0 2px 0 var(--sh-fire); }
+.sh-part-link.off { color: var(--sh-dim); }
+
 /* кнопки трибунала */
 .sh-btn {
   position: relative;
@@ -1631,6 +1651,7 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
   .sh-ident img { flex: 0 0 auto; width: 44%; max-width: 210px; }
   .sh-name { flex: 1 1 120px; font-size: 11.5px; letter-spacing: 0.16em; }
   .sh-unit { display: none; }
+  .sh-parts { flex: 1 1 100%; }
   .sh-dial { width: min(calc(100% - 64px), 460px); margin: 3% 0 8%; }
 
   .sh-chain {

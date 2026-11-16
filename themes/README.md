@@ -57,8 +57,10 @@ TitleThemes.register("<id>", {
 | `scoreQuiz(answers)` | посчитать без сохранения: `{ score, answered, total, complete }` |
 | `verdictFor(score)` | вердикт под оценку: `{ min, label, text }` или `null` |
 | `saveQuiz(answers)` | сохранить ответы и оценку; возвращает оценку |
+| `quizRun()` | готовое прохождение опросника: ход по вопросам и ответы-черновик, которые переживают закрытие окна и перезагрузку. `{ questions, i, question, last, answers, draft, answered(q), start(), pick(value), go(±1), canNext, canSubmit, firstUnanswered(), jump(n), submit() }`. `pick` возвращает `true`, если после ответа можно сразу идти дальше (вопрос с одним ответом, не последний); `submit()` сохраняет и возвращает `{ score, verdict }`. Теме остаётся разметка, клавиши и оглашение оценки — новые темы берут это, а не пишут ход опросника заново |
 | `clearQuiz()` | снять оценку (пройти заново с чистого листа) |
 | `onChange(fn)` | `fn()` после любой отметки — и своей, и пришедшей с другого устройства |
+| `chain()` | место тайтла в серии (`data/franchises.json`): `{ id, title, index, total, prev, next }` или `null`. `prev`/`next` — `{ title, href, added, released, status }`: `href` есть, только если часть уже добавлена на сайт; `released: false` — ещё не вышла. **Ссылка на следующую часть обязательна на каждой странице**: пользователь смотрит строго по порядку и переходит с части на часть. Нет `href` — показать название и «ещё не добавлен» / «ещё не вышел» |
 | `neighbors` | соседние тайтлы в списке: `{ prev, next }`, каждый `{ id, title, href }` или `null` — для своей навигации |
 | `art` | `hero(attrs)`, `logo(attrs)`, `cover(attrs)` — теги `<img>` арта с запасными адресами |
 | `handoff` | `{ layers, data }`, если пришли с главной через `cover()`; иначе `null` |

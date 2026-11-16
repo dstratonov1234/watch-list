@@ -1,0 +1,9 @@
+{
+  "sentenced-to-be-a-hero": {
+    "title": "Приговорённый быть героем",
+    "entries": [
+      { "id": "sentenced-to-be-a-hero", "title": "Сезон 1", "year": 2026, "kind": "season" },
+      { "title": "Сезон 2", "kind": "season", "released": false }
+    ]
+  }
+}

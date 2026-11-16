@@ -26,6 +26,7 @@
     arriving: false,
     listScroll: 0,
     extraCache: new Map(), // id → { episodes, quiz }
+    franchises: {}, // data/franchises.json: порядок просмотра частей одной серии (сезоны, фильмы)
     // Версия кода и данных (titles.json → build) — добавляется к файлам тем, чтобы после обновления не висел старый кэш.
     version: "",
     pageToken: 0,
@@ -274,6 +275,109 @@
     return [...(quiz?.verdicts ?? [])].sort((a, b) => b.min - a.min).find((v) => score >= v.min) ?? null;
   }
 
+  // Прохождение опросника: ход по вопросам и ответы-черновик, которые переживают закрытие окна и перезагрузку
+  // (sessionStorage). Логика у всех тайтлов одна — тема только рисует вопросы в своём образе и зовёт эти методы.
+  function quizRun(t, quiz) {
+    const qs = quiz?.questions ?? [];
+    const key = `wl-draft:${t.id}`;
+    const run = { answers: {}, i: 0, draft: false };
+    try {
+      const d = JSON.parse(sessionStorage.getItem(key) ?? "null");
+      if (d && d.a && typeof d.a === "object") Object.assign(run, { answers: d.a, i: clamp(Number(d.i) || 0, 0, Math.max(0, qs.length - 1)), draft: true });
+    } catch {
+      /* битый черновик — начнём заново */
+    }
+    const save = () => {
+      run.draft = true;
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ a: run.answers, i: run.i }));
+      } catch {
+        /* без памяти вкладки черновик живёт до ухода со страницы */
+      }
+    };
+    const drop = () => {
+      run.draft = false;
+      try {
+        sessionStorage.removeItem(key);
+      } catch {
+        /* нечего чистить */
+      }
+    };
+    const answered = (q) => isAnswered(q, run.answers[q.id]);
+    return {
+      questions: qs,
+      get i() {
+        return run.i;
+      },
+      get answers() {
+        return run.answers;
+      },
+      get draft() {
+        return run.draft;
+      },
+      get question() {
+        return qs[run.i] ?? null;
+      },
+      get last() {
+        return run.i === qs.length - 1;
+      },
+      answered,
+      // Начать или продолжить. Без черновика — с первого вопроса и с прежними ответами, если опросник уже проходили.
+      start() {
+        if (!run.draft) {
+          run.answers = JSON.parse(JSON.stringify(Store.entry(t.id).q?.a ?? {}));
+          run.i = 0;
+        }
+        return run.i;
+      },
+      // Ответ на текущий вопрос (у multi — переключить вариант). true — можно сразу идти к следующему вопросу.
+      pick(value) {
+        const q = qs[run.i];
+        if (!q) return false;
+        if (q.type === "multi") {
+          const cur = new Set(Array.isArray(run.answers[q.id]) ? run.answers[q.id] : []);
+          cur.has(value) ? cur.delete(value) : cur.add(value);
+          run.answers[q.id] = (q.options ?? []).map((o) => o.id).filter((id) => cur.has(id));
+          save();
+          return false;
+        }
+        run.answers[q.id] = q.type === "scale" ? Number(value) : value;
+        save();
+        return run.i < qs.length - 1;
+      },
+      go(delta) {
+        const n = run.i + delta;
+        if (n < 0 || n >= qs.length) return false;
+        const q = qs[run.i];
+        if (delta > 0 && q.type === "multi" && !Array.isArray(run.answers[q.id])) run.answers[q.id] = []; // пустой выбор — тоже ответ
+        run.i = n;
+        save();
+        return true;
+      },
+      get canNext() {
+        const q = qs[run.i];
+        return !!q && (q.type === "multi" || answered(q));
+      },
+      get canSubmit() {
+        return qs.length > 0 && qs.every((q, k) => answered(q) || (k === run.i && q.type === "multi"));
+      },
+      firstUnanswered: () => qs.findIndex((q) => !answered(q)),
+      jump(n) {
+        run.i = clamp(n, 0, Math.max(0, qs.length - 1));
+      },
+      // Сохранить ответы и оценку. null — если отвечено не на всё или отмечать в этом браузере нельзя.
+      submit() {
+        const q = qs[run.i];
+        if (q?.type === "multi" && !Array.isArray(run.answers[q.id])) run.answers[q.id] = [];
+        const r = scoreQuiz(quiz, run.answers);
+        if (!r.complete || !Store.canEdit()) return null;
+        drop();
+        Store.setQuiz(t.id, run.answers, r.score);
+        return { score: r.score, verdict: verdictFor(quiz, r.score) };
+      },
+    };
+  }
+
   function quizState(t, quiz) {
     const q = Store.entry(t.id).q;
     if (!q) return null;
@@ -331,6 +435,7 @@
       assets: `themes/${encodeURIComponent(t.id)}/assets/`,
       progress: p,
       score: p.score,
+      chain: chainOf(t),
       reducedMotion: reduceMotion(),
       finePointer: window.matchMedia("(pointer: fine)").matches,
       art: {
@@ -444,9 +549,15 @@
         return r.score;
       },
       clearQuiz: () => Store.canEdit() && Store.clearQuiz(t.id),
+      // прохождение опросника с черновиком: { questions, i, question, last, answers, draft, start(), pick(v), go(±1),
+      // canNext, canSubmit, firstUnanswered(), jump(n), submit() → { score, verdict } }
+      quizRun: () => quizRun(t, quiz),
       onChange: (fn) => modules.changeFns.push(fn),
       // соседние тайтлы по порядку списка: { id, title, href } или null — для своей навигации темы
       neighbors: neighborsOf(t),
+      // место тайтла в серии (сезоны, фильмы по порядку просмотра): { id, title, index, total, prev, next } или null;
+      // prev/next — { title, href, added, released, status }: href есть, только если эта часть уже добавлена на сайт
+      chain: () => chainOf(t),
       art: themeBase(t).art,
       esc,
       safeUrl,
@@ -864,6 +975,42 @@
 
   const draft = { id: null, answers: {}, open: false }; // ответы опросника, пока он не отправлен
 
+  // Серия — части одной истории в порядке просмотра (data/franchises.json): сезоны, фильмы, спецвыпуски.
+  // Часть может быть ещё не добавлена на сайт (нет id) или ещё не выйти (released: false) — тогда ссылки нет.
+  function chainOf(t) {
+    for (const [fid, f] of Object.entries(state.franchises)) {
+      const list = Array.isArray(f?.entries) ? f.entries : [];
+      const i = list.findIndex((e) => e?.id === t.id);
+      if (i < 0) continue;
+      const pick = (e) => {
+        if (!e) return null;
+        const other = e.id ? state.byId.get(e.id) : null;
+        return {
+          title: e.title ?? other?.title ?? "",
+          href: other ? `#/t/${encodeURIComponent(other.id)}` : null,
+          added: !!other,
+          released: e.released !== false,
+          status: other ? progressOf(other).status : null,
+        };
+      };
+      return { id: fid, title: f.title ?? "", index: i + 1, total: list.length, prev: pick(list[i - 1]), next: pick(list[i + 1]) };
+    }
+    return null;
+  }
+
+  function chainHtml(t) {
+    const c = chainOf(t);
+    if (!c || (!c.prev && !c.next)) return "";
+    const item = (x, dir) => {
+      if (!x) return "<span></span>";
+      const head = `<small>${dir === "prev" ? "← Предыдущая часть" : "Следующая часть →"}</small><b>${esc(x.title)}</b>`;
+      return x.href
+        ? `<a class="neighbor ${dir}" href="${esc(x.href)}">${head}</a>`
+        : `<div class="neighbor ${dir} off">${head}<i>${x.released ? "ещё не добавлена" : "ещё не вышла"}</i></div>`;
+    };
+    return `<nav class="neighbors chain" aria-label="${esc(c.title)}: порядок просмотра">${item(c.prev, "prev")}${item(c.next, "next")}</nav>`;
+  }
+
   function neighborsOf(t) {
     const list = ordered();
     const i = list.findIndex((x) => x.id === t.id);
@@ -977,6 +1124,7 @@
         <div class="title-main">
           ${parts.map((part) => partHtml(part, edit, parts.length === 1)).join("")}
           ${quizHtml(t, extra, p)}
+          ${chainHtml(t)}
           ${neighborsHtml(t)}
         </div>
         <aside class="title-side">
@@ -1319,6 +1467,11 @@
       // build — хэш кода сайта (ставит validate.js --fix): новые файлы тем не берутся из кэша
       state.version = encodeURIComponent(data.build ?? data.updated ?? "");
       state.byId = new Map(state.titles.map((t) => [t.id, t]));
+      // порядок частей в сериях — необязательный файл: без него просто нет ссылок «следующая часть»
+      const fr = await fetch(`data/franchises.json?v=${state.version}`, { cache: "no-cache" })
+        .then((r) => (r.ok ? r.json() : {}))
+        .catch(() => ({}));
+      state.franchises = fr && typeof fr === "object" ? fr : {};
     } catch (err) {
       els.list.innerHTML = `<div class="empty"><strong>Не удалось загрузить список</strong>${esc(err.message)}</div>`;
       return;
