@@ -198,7 +198,10 @@
 }
 
 /* приговор от 6 — золотой штамп, от 7,5 — пламенная печать богини */
-.tbanner[data-title="sentenced-to-be-a-hero"] .sh-b-seal.mid { filter: hue-rotate(38deg) saturate(0.85) brightness(1.35); }
+/* золото — заливкой по форме оттиска (перекраска красного давала бурый) */
+.tbanner[data-title="sentenced-to-be-a-hero"] .sh-b-seal.mid { background: none; }
+.tbanner[data-title="sentenced-to-be-a-hero"] .sh-b-seal.mid::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, #f0d58a, #b8923c); -webkit-mask: url(assets/stamp.webp) center / contain no-repeat; mask: url(assets/stamp.webp) center / contain no-repeat; }
+.tbanner[data-title="sentenced-to-be-a-hero"] .sh-b-seal.mid b { position: relative; color: #f0d58a; box-shadow: 0 0 0 2px #c4a252; }
 .tbanner[data-title="sentenced-to-be-a-hero"] .sh-b-seal.hi { right: 2.4%; width: 116px; height: 116px; margin-top: -58px; background-image: url(assets/seal.webp); transform: none; }
 .tbanner[data-title="sentenced-to-be-a-hero"] .sh-b-seal.hi b { padding: 0; background: none; box-shadow: none; font-size: 28px; color: #fff3d6; text-shadow: 0 0 14px #ef8a3a, 0 2px 8px #000; }
 
@@ -507,16 +510,17 @@
 /* открытие: полосы разъезжаются вдоль разрезов, через одну — в разные стороны */
 .sh-cut.opening .sh-cut-band::before {
   transform: translateY(var(--dir)) scaleX(1.02);
-  transition: transform 0.9s cubic-bezier(0.3, 0, 0.2, 1) calc(var(--j) * 60ms);
+  transition: transform 0.85s cubic-bezier(0.16, 0.5, 0.2, 1) calc(var(--j) * 55ms);
 }
 
 .sh-cut.opening .sh-cut-title { opacity: 0; transform: scale(0.97); transition: opacity 0.2s ease, transform 0.4s ease; }
 
 /* ---------------------------------------------------------- страница --- */
-/* Зал приговора. В центре — печать приговора: пламенное кольцо священной печати из мира сериала;
-   по его окружности — приказы о наказании: исполненные горят, остальные погашены, в середине — приговор.
-   Слева — дело (имя, счёт приказов, приговор словами), справа — выбранный приказ с кадром и печатью
-   «исполнено». Всё на одном экране: приказы не лента карточек, а сектора одной печати. */
+/* Зал приговора. Слева на всю высоту — печать приговора: пламенное кольцо священной печати из мира сериала;
+   его сектора — приказы о наказании: исполненные горят, остальные погашены, в середине — счёт, а после
+   трибунала — приговор; под печатью по её оси — зарубки и приговор словами. Справа — имя и выбранный приказ
+   с кадром; на углу кадра — печать «исполнено», единственное действие на экране. Приказы — не лента
+   карточек, а сектора одной печати. */
 
 @property --sh-fill {
   syntax: "<number>";
@@ -544,7 +548,7 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   pointer-events: none;
   background:
     radial-gradient(900px 620px at 12% -8%, rgba(179, 39, 43, 0.22), transparent 70%),
-    radial-gradient(1000px 700px at 50% 46%, rgba(239, 138, 58, 0.09), transparent 62%),
+    radial-gradient(1000px 700px at 36% 46%, rgba(239, 138, 58, 0.09), transparent 62%),
     radial-gradient(700px 520px at 100% 30%, rgba(196, 162, 82, 0.06), transparent 70%);
 }
 
@@ -566,15 +570,15 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   position: relative;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(210px, 290px) minmax(0, 1fr) minmax(300px, 410px);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
   grid-template-rows: auto 1fr auto;
   grid-template-areas:
-    "ident seat order"
-    "docket seat order"
-    "neigh neigh neigh";
-  column-gap: clamp(16px, 2.2vw, 36px);
+    "seat ident"
+    "seat order"
+    "neigh neigh";
+  column-gap: clamp(20px, 3vw, 52px);
   width: 100%;
-  max-width: 1600px;
+  max-width: 1500px;
   min-height: 100vh;
   margin: 0 auto;
   padding: var(--pad);
@@ -582,19 +586,11 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   font-family: var(--t-body);
 }
 
-/* ---- дело: имя, счёт приказов, приговор словами ---- */
-
-.sh-ident {
-  grid-area: ident;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  min-width: 0;
-}
-
 .sh-back {
-  margin-bottom: 14px;
+  position: absolute;
+  left: var(--pad);
+  top: var(--pad);
+  z-index: 3;
   padding: 6px 0;
   border-bottom: 1px solid color-mix(in srgb, var(--sh-gold) 55%, transparent);
   font: 700 11.5px/1 var(--t-body);
@@ -606,8 +602,20 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 }
 
 .sh-back:hover, .sh-back:focus-visible { padding-left: 8px; border-color: var(--sh-paper); color: var(--sh-paper); outline: none; }
-.sh-back:focus-visible { box-shadow: 0 2px 0 var(--sh-fire); }
-.sh-ident img { display: block; width: 100%; max-width: 280px; height: auto; filter: drop-shadow(0 4px 14px #000); }
+.sh-back:focus-visible { box-shadow: 0 3px 0 var(--sh-fire); }
+
+/* ---- имя ---- */
+
+.sh-ident {
+  grid-area: ident;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sh-ident img { display: block; width: 100%; max-width: 310px; height: auto; filter: drop-shadow(0 4px 14px #000); }
 
 .sh-name {
   margin: 0;
@@ -618,6 +626,7 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 }
 
 .sh-unit {
+  align-self: stretch;
   margin: 0;
   padding-top: 10px;
   border-top: 1px solid color-mix(in srgb, var(--sh-gold) 50%, transparent);
@@ -628,49 +637,7 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   color: var(--sh-gold);
 }
 
-.sh-docket {
-  grid-area: docket;
-  align-self: end;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  min-width: 0;
-  padding-bottom: 6px;
-}
-
-.sh-served { display: grid; justify-items: start; gap: 9px; color: var(--sh-paper); }
-
-.sh-served-line {
-  margin: 0;
-  font: 700 10.5px/1.4 var(--t-body);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--sh-dim);
-}
-
-.sh-served-line b { font: 800 17px/1 var(--t-display); letter-spacing: 0.04em; color: var(--sh-paper); }
-.sh-where { margin: 0; font: italic 400 15px/1.4 var(--t-body); color: var(--sh-dim); }
-.sh-where b { font-style: normal; font-weight: 700; color: var(--sh-paper); }
-.sh-served .sh-btn { margin-top: 6px; }
-
-/* в узкой колонке дела кнопки не должны ломаться на две строки */
-.sh-docket .sh-btn { padding: 13px 22px; letter-spacing: 0.13em; white-space: nowrap; }
-
-.sh-verdict {
-  display: grid;
-  justify-items: start;
-  gap: 5px;
-  padding-top: 18px;
-  border-top: 1px solid color-mix(in srgb, var(--sh-gold) 50%, transparent);
-}
-
-.sh-verdict:empty { display: none; }
-.sh-verdict-kicker { font: 700 10.5px/1.2 var(--t-body); letter-spacing: 0.24em; text-transform: uppercase; color: var(--sh-gold); }
-.sh-verdict-label { font: italic 700 clamp(22px, 2.1vw, 29px) / 1.15 var(--t-display); color: var(--sh-paper); }
-.sh-verdict-text { font-size: 14.5px; line-height: 1.45; color: var(--sh-dim); }
-.sh-verdict .sh-btn { margin-top: 12px; }
-.sh-verdict-note { font: italic 400 14.5px/1.45 var(--t-body); color: var(--sh-dim); }
-
+/* кнопки трибунала */
 .sh-btn {
   position: relative;
   display: inline-flex;
@@ -708,6 +675,8 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 }
 
 .sh-btn.line:hover, .sh-btn.line:focus-visible { background: var(--sh-paper); color: var(--sh-paper); }
+/* контур обрезан силуэтом, поэтому фокус с клавиатуры показываем заливкой вставки */
+.sh-btn.line:focus-visible::before { background: #3a2a18; }
 
 /* ---- печать приговора ---- */
 
@@ -717,7 +686,6 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   min-width: 0;
 }
 
@@ -748,12 +716,13 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 .sh-dial {
   position: relative;
   container-type: inline-size;
-  width: min(calc(100% - 124px), 74vh, 680px);
+  width: min(calc(100% - 124px), 62vh, 640px);
   aspect-ratio: 1;
-  margin: 7% 0 6%;
+  /* снизу запас под номер приказа на шести часах — он стоит снаружи кольца */
+  margin: 5% 0 6%;
 }
 
-/* печать висит на цепях; помилование (приговор от 7,5) их снимает */
+/* печать висит на цепях, уходящих из-за кольца вверх; помилование (приговор от 7,5) их снимает */
 .sh-chain {
   position: absolute;
   left: 50%;
@@ -763,13 +732,13 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   height: 100vmax;
   margin-left: -7px;
   transform-origin: 50% 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='34' viewBox='0 0 14 34'%3E%3Crect x='2.5' y='1.5' width='9' height='19' rx='4.5' fill='none' stroke='%234a4037' stroke-width='3'/%3E%3Crect x='5.5' y='17' width='3' height='17' rx='1.5' fill='%233b342d'/%3E%3C/svg%3E") 0 0 / 14px 34px repeat-y;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='34' viewBox='0 0 14 34'%3E%3Crect x='2.5' y='1.5' width='9' height='19' rx='4.5' fill='none' stroke='%234a4037' stroke-width='3'/%3E%3Cpath d='M3.2 6.5v9' stroke='%23786a58' stroke-width='1' stroke-linecap='round'/%3E%3Crect x='5.5' y='17' width='3' height='17' rx='1.5' fill='%233b342d'/%3E%3Cpath d='M6.1 19v13' stroke='%23645848' stroke-width='0.8' stroke-linecap='round'/%3E%3C/svg%3E") 0 0 / 14px 34px repeat-y;
   pointer-events: none;
   transition: opacity 1.2s ease 0.4s;
 }
 
-.sh-chain.a { transform: rotate(153deg) translateY(45cqw); }
-.sh-chain.b { transform: rotate(207deg) translateY(45cqw); }
+.sh-chain.a { transform: rotate(153deg) translateY(39cqw); }
+.sh-chain.b { transform: rotate(207deg) translateY(39cqw); }
 .sh-hall.tier-hi .sh-chain { opacity: 0; }
 
 /* середина печати: осуждённый под куполом собора, вид сверху */
@@ -797,77 +766,123 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   background: radial-gradient(circle, rgba(7, 6, 5, 0.74) 0 30%, rgba(7, 6, 5, 0.3) 66%, rgba(7, 6, 5, 0.78) 100%);
 }
 
+/* кольцо: погашенное — и поверх него горящая часть, столько, сколько приказов исполнено.
+   Радиальная маска оставляет только само кольцо: у ассета в углах есть слабая дымка, без маски
+   вокруг горящей части проступал бы квадрат */
 .sh-dial-ring {
+  --ring: radial-gradient(closest-side, transparent 50%, #000 55%, #000 93%, transparent 100%);
   position: absolute;
   inset: 0;
   background: url(assets/seal.webp) center / contain no-repeat;
+  -webkit-mask-image: var(--ring);
+  mask-image: var(--ring);
   pointer-events: none;
 }
 
-/* погашенное кольцо — и поверх него горящая часть: столько, сколько приказов исполнено */
 .sh-dial-ring.dim { filter: grayscale(1) brightness(0.36) contrast(1.15); }
 
+/* передний край пламени растушёван на 3°; при полном круге стык уходит за 360° */
 .sh-dial-ring.lit {
-  -webkit-mask-image: conic-gradient(#000 calc(var(--sh-fill) * 1turn), transparent 0);
-  mask-image: conic-gradient(#000 calc(var(--sh-fill) * 1turn), transparent 0);
+  -webkit-mask-image: var(--ring), conic-gradient(#000 calc(var(--sh-fill) * 363deg - 3deg), transparent calc(var(--sh-fill) * 363deg));
+  mask-image: var(--ring), conic-gradient(#000 calc(var(--sh-fill) * 363deg - 3deg), transparent calc(var(--sh-fill) * 363deg));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
   filter: drop-shadow(0 0 16px rgba(239, 138, 58, 0.5));
 }
 
-/* разрезы между приказами */
+/* печати, которые снимет взведённый возврат, гаснут заранее */
+.sh-dial-ring.doom {
+  display: none;
+  -webkit-mask-image: var(--ring), conic-gradient(transparent calc(var(--sh-da, 0) * 1turn), #000 0 calc(var(--sh-db, 0) * 1turn), transparent 0);
+  mask-image: var(--ring), conic-gradient(transparent calc(var(--sh-da, 0) * 1turn), #000 0 calc(var(--sh-db, 0) * 1turn), transparent 0);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  filter: grayscale(0.8) brightness(0.48);
+}
+
+.sh-dial.arming .sh-dial-ring.doom { display: block; }
+
+/* голова пламени на переднем крае: кольцо не обрублено по линейке, а горит */
+.sh-dial-head {
+  position: absolute;
+  inset: 0;
+  rotate: calc(var(--sh-fill) * 1turn);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+.sh-dial.partial .sh-dial-head { opacity: 1; }
+
+.sh-dial-head::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 2.5%;
+  width: 6.5cqw;
+  height: 22cqw;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #fff7e0 0, #ffd08a 28%, rgba(239, 138, 58, 0.72) 58%, transparent 100%);
+  mix-blend-mode: screen;
+  filter: blur(1.5px);
+}
+
+/* разрезы между приказами: тёмная линия со светлой кромкой, чтобы читалась и на погашенной половине */
 .sh-dial-gaps {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: repeating-conic-gradient(from -0.3deg, #070605 0 0.6deg, transparent 0.6deg calc(360deg / var(--n, 12)));
-  -webkit-mask-image: radial-gradient(closest-side, transparent 54%, #000 56%, #000 88%, transparent 92%);
-  mask-image: radial-gradient(closest-side, transparent 54%, #000 56%, #000 88%, transparent 92%);
+  background: repeating-conic-gradient(from -0.45deg, #070605 0 0.9deg, rgba(236, 227, 208, 0.16) 0.9deg 1.2deg, transparent 1.2deg calc(360deg / var(--n, 12)));
+  -webkit-mask-image: radial-gradient(closest-side, transparent 56%, #000 58%, #000 84%, transparent 87%);
+  mask-image: radial-gradient(closest-side, transparent 56%, #000 58%, #000 84%, transparent 87%);
   pointer-events: none;
 }
 
-.sh-dial.dense .sh-dial-gaps { display: none; }
-
+.sh-dial.dense .sh-dial-gaps, .sh-dial.solo .sh-dial-gaps { display: none; }
 .sh-dial-svg { position: absolute; inset: -12%; width: 124%; height: 124%; overflow: visible; }
 
-.sh-w {
-  fill: transparent;
-  stroke: transparent;
-  stroke-width: 0.7;
-  outline: none;
-  cursor: pointer;
-  pointer-events: all;
-  transition: fill 0.2s, stroke 0.2s;
-}
+/* сектор — невидимая зона нажатия; видимая обводка выбранного и следующего — отдельные контуры по телу кольца */
+.sh-w { fill: transparent; stroke: none; outline: none; cursor: pointer; pointer-events: all; }
+.sh-mark { fill: none; pointer-events: none; transition: opacity 0.3s; }
+.sh-mark.next { stroke: var(--sh-fire); stroke-width: 0.9; stroke-dasharray: 2.2 1.8; }
 
-.sh-w:hover { fill: rgba(236, 227, 208, 0.12); }
-.sh-w.next { stroke: var(--sh-fire); stroke-dasharray: 2 1.6; }
-.sh-w.doomed { fill: rgba(12, 10, 9, 0.62); }
-
-.sh-w.sel {
-  fill: rgba(255, 243, 214, 0.08);
+.sh-mark.sel {
+  fill: rgba(255, 243, 214, 0.07);
   stroke: #fff3d6;
-  stroke-width: 1.2;
-  stroke-dasharray: none;
+  stroke-width: 1.3;
   filter: drop-shadow(0 0 3px rgba(255, 208, 138, 0.95));
 }
 
-.sh-w:focus-visible { stroke: #fff; stroke-width: 2; }
+/* фокус с клавиатуры всегда стоит на выбранном секторе — он заметно ярче простого выбора */
+.sh-dial-svg:has(.sh-w:focus-visible) .sh-mark.sel {
+  stroke: #fff;
+  stroke-width: 2.8;
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px var(--sh-fire));
+}
 
+/* номер — только у выбранного, следующего и последнего исполненного приказа (и под курсором) */
 .sh-wn {
   font-family: var(--t-display);
-  font-size: 5.6px;
+  font-size: 6px;
   font-weight: 800;
   font-variant-numeric: lining-nums;
   text-anchor: middle;
   dominant-baseline: central;
-  fill: var(--sh-dim);
-  opacity: 0.5;
+  fill: var(--sh-paper);
+  opacity: 0;
   pointer-events: none;
-  transition: fill 0.3s, opacity 0.3s, font-size 0.25s;
+  transition: opacity 0.2s, font-size 0.25s;
 }
 
-.sh-wn.seen { fill: var(--sh-gold); opacity: 1; }
+.sh-wn.last { fill: var(--sh-gold); opacity: 1; }
 .sh-wn.next { fill: var(--sh-fire); opacity: 1; }
 .sh-wn.sel { fill: #fff3d6; font-size: 8px; opacity: 1; }
+.sh-w:hover + .sh-wn { opacity: 1; }
+.sh-dial.solo .sh-wn { display: none; }
+
+/* после приговора печать чистая: обводка и номера возвращаются под курсором и с клавиатуры */
+.sh-hall.judged .sh-dial:not(:hover, :focus-within) :is(.sh-mark, .sh-wn) { opacity: 0; }
 
 /* середина: счёт приказов, а после трибунала — приговор */
 .sh-dial-center {
@@ -922,38 +937,42 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 }
 
 .sh-center-cta {
-  margin-top: 1.8cqw;
-  padding: 1.1cqw 2.8cqw 1.3cqw;
+  margin-top: 2cqw;
+  padding: 1.5cqw 3.4cqw 1.7cqw;
   background: var(--sh-fire);
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  font: 800 clamp(8.5px, 2.1cqw, 12.5px) / 1 var(--t-display);
-  letter-spacing: 0.2em;
+  font: 800 clamp(10px, 2.5cqw, 14.5px) / 1 var(--t-display);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--sh-ink);
   transition: background 0.2s;
 }
 
 .sh-center-btn:hover .sh-center-cta, .sh-center-btn:focus-visible .sh-center-cta { background: #ffd08a; }
-.sh-score { display: grid; place-content: center; justify-items: center; gap: 0.8cqw; }
+.sh-score { position: relative; display: grid; place-content: center; justify-items: center; gap: 2.4cqw; }
 
 .sh-score b {
+  position: relative;
   font: 900 clamp(58px, 24cqw, 176px) / 0.84 var(--t-display);
   font-variant-numeric: lining-nums;
 }
 
-.sh-score i { font: italic 700 clamp(11px, 2.8cqw, 18px) / 1 var(--t-display); color: var(--sh-gold); text-shadow: 0 1px 8px #000; }
+.sh-score i { font: italic 700 clamp(13px, 3.4cqw, 22px) / 1 var(--t-display); color: var(--sh-gold); text-shadow: 0 1px 8px #000; }
 
 /* от 7,5 — оценка горит в самой печати; от 6 — золотой штамп; ниже — кровавый */
 .sh-score.hi b { color: #fff3d6; text-shadow: 0 0 0.3em var(--sh-fire), 0 0 0.9em rgba(239, 138, 58, 0.55), 0 4px 16px #000; }
+.sh-score.mid, .sh-score.lo { width: 40cqw; height: 40cqw; transform: rotate(-8deg); }
+.sh-score.lo { background: url(assets/stamp.webp) center / contain no-repeat; }
 
-.sh-score.mid, .sh-score.lo {
-  width: 40cqw;
-  height: 40cqw;
-  background: url(assets/stamp.webp) center / contain no-repeat;
-  transform: rotate(-8deg);
+/* золото — не перекраской красного, а заливкой по форме оттиска */
+.sh-score.mid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #f0d58a, #b8923c);
+  -webkit-mask: url(assets/stamp.webp) center / contain no-repeat;
+  mask: url(assets/stamp.webp) center / contain no-repeat;
 }
-
-.sh-score.mid { filter: hue-rotate(38deg) saturate(0.85) brightness(1.35); }
 
 .sh-score.mid b, .sh-score.lo b {
   padding: 0 2.4cqw 1.6cqw;
@@ -963,6 +982,7 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   color: #ff5a4f;
 }
 
+.sh-score.mid b { box-shadow: 0 0 0 0.5cqw var(--sh-gold); color: #f0d58a; }
 .sh-score.mid i, .sh-score.lo i { display: none; }
 
 /* удар по сектору: клинок света падает на приказ по радиусу, пламя вспыхивает */
@@ -990,24 +1010,65 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 
 .sh-dial-strike .sh-burst { left: 0; top: -38cqw; }
 
+/* ---- под печатью, по её оси: зарубки и приговор словами ---- */
+
+.sh-docket {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 12px;
+  min-height: 124px;
+  text-align: center;
+}
+
+.sh-served { color: var(--sh-paper); }
+.sh-served .sh-tally { justify-content: center; }
+.sh-verdict { display: grid; justify-items: center; gap: 4px; }
+.sh-verdict:empty { display: none; }
+.sh-verdict-kicker { font: 700 10.5px/1.2 var(--t-body); letter-spacing: 0.26em; text-transform: uppercase; color: var(--sh-gold); }
+.sh-verdict-label { font: italic 700 clamp(25px, 2.5vw, 36px) / 1.1 var(--t-display); color: var(--sh-paper); }
+.sh-verdict-text { max-width: 30em; font-size: 15px; line-height: 1.45; color: var(--sh-dim); }
+.sh-verdict-note { max-width: 32em; font: italic 400 14.5px/1.45 var(--t-body); color: var(--sh-dim); }
+
+/* второстепенное действие — подчёркнутой строкой, а не кнопкой: главное действие на экране одно */
+.sh-link {
+  margin-top: 8px;
+  padding: 6px 2px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--sh-gold) 55%, transparent);
+  background: none;
+  color: var(--sh-gold);
+  font: 700 11px/1 var(--t-body);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.sh-link:hover, .sh-link:focus-visible { border-color: var(--sh-paper); color: var(--sh-paper); outline: none; }
+.sh-link:focus-visible { box-shadow: 0 3px 0 var(--sh-fire); }
+
 /* ---- выбранный приказ ---- */
 
-.sh-order { grid-area: order; align-self: center; min-width: 0; color: var(--sh-dim); }
+.sh-order { grid-area: order; align-self: start; min-width: 0; margin-top: clamp(14px, 4vh, 44px); color: var(--sh-dim); }
 .sh-order.seen, .sh-order.next { color: var(--sh-paper); }
 .sh-order-in { position: relative; isolation: isolate; display: flex; flex-direction: column; }
 
 .sh-order-no {
   position: absolute;
   right: -4px;
-  top: -0.66em;
+  top: 0.04em;
   z-index: -1;
-  font: 900 clamp(120px, 13vw, 204px) / 0.8 var(--t-display);
+  font: 900 clamp(110px, 11vw, 168px) / 0.8 var(--t-display);
   font-variant-numeric: lining-nums;
   color: transparent;
-  -webkit-text-stroke: 1px color-mix(in srgb, var(--sh-gold) 30%, transparent);
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--sh-gold) 50%, transparent);
   pointer-events: none;
   user-select: none;
 }
+
+/* вид приказа и его название — одним блоком, прижатым к кадру: кадр не прыгает от длины названия */
+.sh-order-head { display: flex; flex-direction: column; justify-content: flex-end; min-height: 8.2em; margin-bottom: 18px; }
 
 .sh-kind {
   margin: 0 0 8px;
@@ -1018,18 +1079,10 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 }
 
 .sh-order.next .sh-kind { color: var(--sh-fire); }
+.sh-what { margin: 0; font: 600 clamp(20px, 1.9vw, 27px) / 1.25 var(--t-display); text-wrap: balance; }
 
-.sh-what {
-  display: flex;
-  align-items: flex-end;
-  min-height: 3.75em;
-  margin: 0 0 20px;
-  font: 600 clamp(20px, 1.9vw, 27px) / 1.25 var(--t-display);
-  text-wrap: balance;
-}
-
-/* кадр серии со срезом клинка по левому краю; уходит за правый край экрана */
-.sh-still { position: relative; aspect-ratio: 16 / 9; margin-right: calc(-1 * var(--pad)); }
+/* кадр серии со срезом клинка по левому краю */
+.sh-still { position: relative; aspect-ratio: 16 / 9; }
 
 .sh-still img {
   position: absolute;
@@ -1038,12 +1091,16 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   height: 100%;
   object-fit: cover;
   clip-path: polygon(38px 0, 100% 0, 100% 100%, 0 100%);
-  filter: grayscale(1) brightness(0.3) contrast(1.1);
+  filter: grayscale(1) brightness(0.32) contrast(1.1);
   transition: filter 0.6s;
 }
 
 .sh-order.seen .sh-still img { filter: none; }
-.sh-order.next .sh-still img { filter: grayscale(0.55) brightness(0.6); }
+.sh-order.next .sh-still img { filter: grayscale(0.3) brightness(0.76); }
+
+/* своего кадра у серии нет — общий арт тайтла, приглушённый */
+.sh-still img.sh-fallback { object-position: 30% 28%; filter: grayscale(0.7) brightness(0.36); }
+.sh-order.seen .sh-still img.sh-fallback, .sh-order.next .sh-still img.sh-fallback { filter: grayscale(0.2) brightness(0.62); }
 
 .sh-still::before {
   content: "";
@@ -1057,20 +1114,16 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
   pointer-events: none;
 }
 
-/* кадра нет — остаётся только место печати */
-.sh-still.none { aspect-ratio: auto; height: 104px; margin-right: 0; }
-.sh-still.none::before { display: none; }
-
-/* место печати — на углу кадра */
+/* печать на углу кадра — единственное действие: «остановился на этом приказе» */
 .sh-stamp {
   position: absolute;
-  left: -16px;
-  bottom: -46px;
+  left: -24px;
+  bottom: -60px;
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 136px;
-  height: 136px;
+  width: 164px;
+  height: 164px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -1082,18 +1135,21 @@ html[data-title="sentenced-to-be-a-hero"] body { background: var(--sh-ink); }
 .sh-stamp::before {
   content: "";
   position: absolute;
-  inset: 9px;
-  border: 1.5px dashed color-mix(in srgb, var(--sh-dim) 60%, transparent);
+  inset: 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--sh-paper) 55%, transparent);
   border-radius: 50%;
-  background: rgba(12, 10, 9, 0.78);
-  transition: border-color 0.2s, transform 0.3s, opacity 0.2s;
+  background: rgba(12, 10, 9, 0.56);
+  transition: border-color 0.2s, transform 0.3s, opacity 0.2s, background 0.2s;
 }
 
 .sh-order.seen .sh-stamp::before { opacity: 0; }
 .sh-order.next .sh-stamp::before { border-color: var(--sh-fire); }
 button.sh-stamp { cursor: pointer; }
-button.sh-stamp:hover::before, button.sh-stamp:focus-visible::before { border-color: var(--sh-paper); transform: rotate(40deg); }
+button.sh-stamp:hover::before, button.sh-stamp:focus-visible::before { border-color: var(--sh-paper); background: rgba(12, 10, 9, 0.4); transform: rotate(40deg); }
 button.sh-stamp:focus-visible { outline: 2px solid var(--sh-fire); outline-offset: 2px; }
+/* посетителю без права отмечать место печати не должно казаться кнопкой */
+div.sh-stamp::before { border-color: color-mix(in srgb, var(--sh-dim) 45%, transparent); opacity: 0.4; animation: none !important; }
+.sh-order.seen div.sh-stamp::before { opacity: 0; }
 
 .sh-ink {
   position: absolute;
@@ -1107,38 +1163,43 @@ button.sh-stamp:focus-visible { outline: 2px solid var(--sh-fire); outline-offse
 }
 
 .sh-ink b {
-  padding: 3px 8px 4px;
+  padding: 4px 10px 5px;
   background: #1a100d;
   box-shadow: 0 0 0 2px var(--sh-blood);
-  font: 700 12.5px/1 var(--t-body);
+  font: 700 15px/1 var(--t-body);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #ff5a4f;
 }
 
+/* оттиск-призрак подсказывает, что здесь ставят печать */
+button.sh-stamp .sh-ink { opacity: 0.22; }
+.sh-order:not(.seen) .sh-ink b { visibility: hidden; }
 .sh-order.seen .sh-ink { opacity: 0.95; transform: rotate(-11deg); }
-button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 0.4; }
-.sh-order.seen button.sh-stamp:hover .sh-ink, .sh-order.seen button.sh-stamp:focus-visible .sh-ink { opacity: 0.72; }
+button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 0.5; }
+.sh-order.seen button.sh-stamp:hover .sh-ink, .sh-order.seen button.sh-stamp:focus-visible .sh-ink { opacity: 0.74; }
 
 .sh-do {
   position: relative;
-  max-width: 96px;
-  font: 700 10.5px/1.3 var(--t-body);
+  max-width: 116px;
+  font: 700 13px/1.3 var(--t-body);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-align: center;
-  color: var(--sh-dim);
+  color: var(--sh-paper);
+  text-shadow: 0 1px 6px #000;
   transition: opacity 0.2s;
 }
 
-.sh-order.next .sh-do { color: var(--sh-fire); }
-.sh-order.seen .sh-do, button.sh-stamp:hover .sh-do, button.sh-stamp:focus-visible .sh-do { opacity: 0; }
+.sh-order:not(.next, .armed) .sh-do { font-size: 11.5px; }
+.sh-order.seen .sh-do { opacity: 0; }
 
 /* возврат назад: печать «взведена» и ждёт второго нажатия */
 .sh-order.armed .sh-ink, .sh-order.armed button.sh-stamp:hover .sh-ink, .sh-order.armed button.sh-stamp:focus-visible .sh-ink { opacity: 0.14; }
-.sh-order.armed .sh-do, .sh-order.armed button.sh-stamp:hover .sh-do, .sh-order.armed button.sh-stamp:focus-visible .sh-do { opacity: 1; color: var(--sh-paper); }
-.sh-order.armed .sh-stamp::before { opacity: 1; border-color: var(--sh-fire); border-style: solid; }
+.sh-order.armed .sh-do { opacity: 1; }
+.sh-order.armed .sh-stamp::before { opacity: 1; border-color: var(--sh-fire); border-style: solid; background: rgba(12, 10, 9, 0.8); }
 
+/* листание в панели — только когда секторов на кольце нет (слишком много серий) */
 .sh-order-nav {
   display: flex;
   align-items: center;
@@ -1146,9 +1207,8 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
   gap: 14px;
   min-height: 46px;
   margin-top: 18px;
-  padding-left: 126px;
-  font: italic 400 14px/1.3 var(--t-body);
-  text-align: right;
+  padding-left: 150px;
+  font: italic 700 16px/1 var(--t-display);
   color: var(--sh-dim);
 }
 
@@ -1159,7 +1219,7 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
   display: grid;
   place-items: center;
   width: 48px;
-  height: 42px;
+  height: 44px;
   padding: 0;
   border: 0;
   background: color-mix(in srgb, var(--sh-gold) 70%, transparent);
@@ -1180,6 +1240,7 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
 }
 
 .sh-nav:hover, .sh-nav:focus-visible { background: var(--sh-paper); color: var(--sh-paper); outline: none; }
+.sh-nav:focus-visible::before { background: #3a2a18; }
 .sh-nav:disabled { opacity: 0.3; cursor: default; background: color-mix(in srgb, var(--sh-gold) 70%, transparent); color: var(--sh-gold); }
 
 /* удар печати: клинок света падает на приказ, печать врезается, летят искры */
@@ -1241,20 +1302,24 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
 .sh-neigh small { font: 700 10.5px/1 var(--t-body); letter-spacing: 0.24em; text-transform: uppercase; color: var(--sh-gold); }
 .sh-neigh b { font: 700 19px/1.2 var(--t-display); }
 
-/* появление после заставки: печать встаёт на место и разгорается от нуля до исполненных приказов */
+/* появление после заставки: печать встаёт на место и разгорается от нуля до исполненных приказов;
+   оценка в середине проявляется, когда круг догорел */
 @media (prefers-reduced-motion: no-preference) {
   .sh-dial { transition: --sh-fill 0.9s cubic-bezier(0.3, 0.7, 0.2, 1); }
   .sh-hall:not(.sh-in) .sh-dial { --sh-fill: 0 !important; }
-  .sh-hall:not(.sh-in) :is(.sh-ident, .sh-docket, .sh-order, .sh-dial, .sh-tabs) { opacity: 0; }
-  .sh-hall.sh-in .sh-ident { animation: sh-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-  .sh-hall.sh-in .sh-docket { animation: sh-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both; }
+  .sh-hall:not(.sh-in) :is(.sh-back, .sh-ident, .sh-docket, .sh-order, .sh-dial, .sh-tabs) { opacity: 0; }
+  .sh-hall.sh-in .sh-ident { animation: sh-file 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both; }
+  .sh-hall.sh-in .sh-back { animation: sh-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
   .sh-hall.sh-in .sh-tabs { animation: sh-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both; }
-  .sh-hall.sh-in .sh-dial { animation: sh-seat 1.15s cubic-bezier(0.2, 0.8, 0.2, 1) both; transition: --sh-fill 1.5s cubic-bezier(0.3, 0.6, 0.2, 1) 0.3s; }
+  .sh-hall.sh-in .sh-dial { animation: sh-seat 1.15s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .sh-hall.sh-arrive .sh-dial { transition: --sh-fill 1.5s cubic-bezier(0.3, 0.6, 0.2, 1) 0.3s; }
+  .sh-hall.sh-arrive .sh-score { animation: sh-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 1.5s both; }
+  .sh-hall.sh-in .sh-docket { animation: sh-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both; }
   .sh-hall.sh-in .sh-order { animation: sh-file 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s both; }
   .sh-order-in.swap > :not(.sh-order-no) { animation: sh-rise 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
   .sh-order-in.swap .sh-order-no { animation: sh-file 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
   .sh-dial.flash .sh-dial-ring.lit { animation: sh-flash 0.8s ease-out; }
-  .sh-order.next .sh-stamp::before { animation: sh-pulse 1.8s ease-in-out infinite; }
+  .sh-order.next button.sh-stamp::before { animation: sh-pulse 1.8s ease-in-out infinite; }
   .sh-center-cta { animation: sh-pulse 1.8s ease-in-out infinite; }
 }
 
@@ -1518,7 +1583,9 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
 .sh-sentence-seal .sh-strike { width: 84px; height: 336px; margin-left: -42px; }
 
 /* от 6 — золотой штамп; от 7,5 — без штампа: оценка горит прямо в пламенной печати */
-.sh-sentence-seal.mid .sh-press { filter: hue-rotate(38deg) saturate(0.85) brightness(1.35); }
+.sh-sentence-seal.mid .sh-press { background: none; }
+.sh-sentence-seal.mid .sh-press::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, #f0d58a, #b8923c); -webkit-mask: url(assets/stamp.webp) center / contain no-repeat; mask: url(assets/stamp.webp) center / contain no-repeat; }
+.sh-sentence-seal.mid b { position: relative; color: #f0d58a; box-shadow: 0 0 0 3px #c4a252; }
 .sh-sentence-seal.hi .sh-press { background: none; }
 .sh-sentence-seal.hi b { padding: 0; background: none; box-shadow: none; color: #fff3d6; text-shadow: 0 0 26px var(--sh-fire), 0 0 60px rgba(239, 138, 58, 0.6), 0 3px 12px #000; }
 .sh-sentence-label { margin: 0; font: italic 800 clamp(30px, 5vw, 46px) / 1.1 var(--t-display); }
@@ -1541,44 +1608,52 @@ button.sh-stamp:hover .sh-ink, button.sh-stamp:focus-visible .sh-ink { opacity: 
 
 /* ----------------------------------------------------- узкие экраны --- */
 
-/* ноутбук: боковые колонки уже, печать остаётся крупной */
+/* ноутбук: колонка приказа уже, печать остаётся крупной */
 @media (max-width: 1360px) {
-  .sh-hall { grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) minmax(280px, 350px); }
-  .sh-dial { width: min(calc(100% - 108px), 74vh, 680px); }
+  .sh-hall { grid-template-columns: minmax(0, 1fr) minmax(280px, 370px); }
+  .sh-dial { width: min(calc(100% - 108px), 62vh, 640px); }
 }
 
-/* планшет и телефон: всё в одну колонку — имя, печать, выбранный приказ, дело */
+/* планшет и телефон: в одну колонку — имя, печать, приказ. Печать на приказе должна попадать
+   на первый экран, поэтому имя сжато в строку, а цепи короткие и не идут через текст */
 @media (max-width: 1020px) {
   .sh-hall {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
-    grid-template-areas: "ident" "seat" "order" "docket" "neigh";
-    row-gap: 26px;
+    grid-template-areas: "back" "ident" "seat" "order" "neigh";
+    row-gap: 14px;
     min-height: 0;
-    padding-bottom: 70px;
+    padding-bottom: 90px;
   }
 
-  .sh-ident { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
-  .sh-back { flex: 0 0 auto; margin: 0 100% 6px 0; }
-  .sh-ident img { flex: 0 0 auto; width: 46%; max-width: 220px; }
+  .sh-back { position: static; grid-area: back; justify-self: start; }
+  .sh-ident { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+  .sh-ident img { flex: 0 0 auto; width: 44%; max-width: 210px; }
   .sh-name { flex: 1 1 120px; font-size: 11.5px; letter-spacing: 0.16em; }
-  .sh-unit { flex: 1 1 100%; }
-  .sh-dial { width: min(calc(100% - 70px), 460px); margin: 9% 0 8%; }
-  .sh-wn { font-size: 8.4px; }
+  .sh-unit { display: none; }
+  .sh-dial { width: min(calc(100% - 64px), 460px); margin: 3% 0 8%; }
+
+  .sh-chain {
+    height: 30cqw;
+    -webkit-mask-image: linear-gradient(#000 35%, transparent);
+    mask-image: linear-gradient(#000 35%, transparent);
+  }
+
+  .sh-wn { font-size: 8.6px; }
   .sh-wn.sel { font-size: 11px; }
-  .sh-order { align-self: start; }
-  /* на телефоне номер приказа — водяной знак за названием, а не над ним: выше стоит печать */
+  .sh-docket { min-height: 0; gap: 10px; }
+  .sh-order { margin-top: 0; }
+  .sh-order-head { min-height: 0; }
+  /* номер приказа — водяной знак за названием: выше стоит печать */
   .sh-order-no { top: -0.16em; font-size: 104px; }
-  .sh-what { min-height: 0; }
-  .sh-still { margin-right: 0; }
-  .sh-docket { align-self: start; }
 }
 
 @media (max-width: 620px) {
-  .sh-stamp { left: -10px; bottom: -40px; width: 118px; height: 118px; }
-  .sh-ink b { font-size: 11px; }
-  .sh-do { font-size: 9.5px; max-width: 84px; }
-  .sh-order-nav { padding-left: 110px; font-size: 13px; gap: 10px; }
+  .sh-stamp { left: -12px; bottom: -44px; width: 136px; height: 136px; }
+  .sh-ink b { font-size: 12.5px; }
+  .sh-do { max-width: 96px; font-size: 12px; }
+  .sh-order:not(.next, .armed) .sh-do { font-size: 10.5px; }
+  .sh-order-nav { padding-left: 130px; }
   .sh-neigh { grid-template-columns: 1fr; }
   .sh-neigh a.next { text-align: left; }
   .sh-trib-in { padding: 34px 24px 30px; }
