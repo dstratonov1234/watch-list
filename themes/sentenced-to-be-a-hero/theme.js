@@ -270,7 +270,12 @@
           verdict.innerHTML = `
             <div class="sh-seal wait" aria-hidden="true"></div>
             <div class="sh-verdict-note">Трибунал соберётся, когда будут исполнены все приказы.</div>`;
-        } else verdict.innerHTML = "";
+        } else {
+          // всё исполнено, но этот браузер не подключён: заседание открыть некому
+          verdict.innerHTML = `
+            <div class="sh-seal wait" aria-hidden="true"></div>
+            <div class="sh-verdict-note">Приговор ещё не вынесен. Созвать трибунал можно из браузера, в котором подключены отметки, — кнопка на главной.</div>`;
+        }
       }
 
       // --- печати на приказах ---
