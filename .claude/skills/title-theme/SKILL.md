@@ -142,7 +142,7 @@ description: Уникальное оформление тайтла в Watch Lis
 
 ## Проверка (обязательно перед публикацией)
 
-Встроенный браузер, когда его панель скрыта, замораживает rAF и CSS-анимации — проверять в headless Chrome (`scripts/shots.mjs`), сервер — конфигурация `site` в `.claude/launch.json` (порт 8780). Адрес для проверок — `http://localhost:8780/?nosync` (без запросов к GitHub; `&readonly` — как видит посетитель без токена).
+Встроенный браузер, когда его панель скрыта, замораживает rAF и CSS-анимации — проверять в headless Chrome (`scripts/shots.mjs`), сервер — конфигурация `site` в `.claude/launch.json` (порт 8780; на macOS — `site-mac`, а Python-скрипты запускать как написано в `CLAUDE.md`, раздел «Локальный просмотр и проверка»). Адрес для проверок — `http://localhost:8780/?nosync` (без запросов к GitHub; `&readonly` — как видит посетитель без токена).
 
 - `node scripts/shots.mjs <url> <w> <h> <scratchpad>/<префикс> [reduced|no] '<steps-json>'` — шаги `eval`, `hoverSel`, `clickSel`, `key`, `shot` (`"full": true`), `castStart`/`castStop`. В `eval` нет верхнеуровневого `await`: циклы с ожиданием оборачивать в `(async () => { … })()`. Длинный JSON шагов удобнее держать в файле и подставлять `"$(cat steps.json)"`.
 - Нужное состояние отметок — первым шагом: `{"eval": "localStorage.setItem('wl-state', JSON.stringify({titles:{'<id>':{w:{s1:5},wt:Date.now(),last:'s1',q:null,qt:Date.now()}}})); location.hash = '#/t/<id>'; location.reload()"}`.

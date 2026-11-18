@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8780", "--bind", "127.0.0.1"],
       "port": 8780
+    },
+    {
+      "name": "site-mac",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve.js"],
+      "port": 8780
     }
   ]
 }

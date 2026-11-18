@@ -106,6 +106,7 @@
 | `scripts/gen-image.py` | ассеты темы через OpenAI Images |
 | `scripts/palette.py`, `scripts/fonts.js`, `scripts/wiki.js` | палитра из арта и контраст; шрифты Google Fonts с кириллицей; картинки со статей вики |
 | `scripts/shots.mjs`, `scripts/check-entrances.py` | headless Chrome: скриншоты и скринкаст сценариев; сквозная проверка входа во все тайтлы |
+| `scripts/serve.js` | локальный сервер на Node (без кэша, только 127.0.0.1) — для машин, где `python -m http.server` не запускается |
 
 ## Данные
 
@@ -210,6 +211,7 @@
 ## Локальный просмотр и проверка
 
 - Сервер: конфигурация `site` в `.claude/launch.json` (`python -m http.server 8780`), открыть http://localhost:8780. `index.html` как файл не открывать — `fetch` не работает с `file://`.
+- **macOS**: команды `python` там обычно нет, а системный `python3` старый (флаг `-P` появился в 3.11) и без Pillow/numpy. Сервер — конфигурация `site-mac` (`node scripts/serve.js`, тот же порт 8780): системный `python3` из панели предпросмотра падает с `PermissionError`, если проект лежит в Downloads или Documents. Python-скрипты (`palette.py`, `gen-image.py`, `check-entrances.py`) — из окружения **вне репозитория** (валидатор обходит всю папку проекта): `uv venv --python 3.12 ~/.venvs/watch-list && uv pip install --python ~/.venvs/watch-list/bin/python pillow numpy`, запуск — `~/.venvs/watch-list/bin/python -P scripts/…`. Completionist List на Mac лежит рядом: `../completionist-list` (вместо `D:\ComplitionistList`).
 - На локальном адресе отмечать можно без токена (отметки остаются в `localStorage` этого браузера и в репозиторий не уходят) — удобно для проверки тем. Чтобы проверить страницу в нужном состоянии, в `shots.mjs` первым шагом положить отметки: `{"eval": "localStorage.setItem('wl-state', JSON.stringify({titles:{'<id>':{w:{s1:5},wt:1,last:'s1',q:null,qt:0}}})); location.reload()"}`. Учти: свежие отметки из ветки `state` приходят с GitHub и побеждают, если они новее (`wt`/`qt`), — для тестов ставить `wt: Date.now()`.
 - Параметры адреса для проверок: `?nosync` — без запросов к GitHub (только отметки этого браузера), `?readonly` — как видит посетитель без токена (кнопок отметки и опросника нет).
 - Встроенный браузер, когда его панель скрыта, замораживает анимации — заставки и переходы проверять в headless Chrome: `python -P scripts/check-entrances.py <scratchpad>/<папка>` и `node scripts/shots.mjs …` (подробности — в навыке `title-theme`).
