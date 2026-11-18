@@ -284,14 +284,17 @@ body.leaving #list-view {
 /* тот баннер, на который навели, — поверх соседей: его выступающие части не прячутся под следующим */
 .tbanner:is(:hover, :focus-visible, .picked) { z-index: 2; }
 
-/* Пока один баннер под курсором (в фокусе, выбран), остальные отступают — сцену этого тайтла за списком
-   видно целиком, а не в просветах. Условие — сам выбранный баннер, а не класс на body: после возврата
-   со страницы тайтла его сцена ещё включена, но ни один баннер не выбран — и ничего не гаснет. */
+/* Пока один баннер под курсором (в фокусе, выбран), остальные уходят совсем — сцену этого тайтла за списком
+   видно целиком. Именно совсем: полупрозрачный баннер ложится на сцену прямоугольным пятном с жёсткими краями
+   (белый — молочной полосой, тёмный — тенью), и пользователь это сразу увидел. Уходят с небольшой задержкой,
+   чтобы список не мигал, когда курсор просто ведут через него; возвращаются сразу.
+   Условие — сам выбранный баннер, а не класс на body: после возврата со страницы тайтла его сцена ещё
+   включена, но ни один баннер не выбран — и ничего не гаснет. */
 .title-list:has(.tbanner:is(:focus-visible, .picked)) .tbanner:not(:focus-visible, .picked, :hover),
-.title-list:has(.tbanner:is(:focus-visible, .picked)) .cat-head { opacity: 0.2; }
+.title-list:has(.tbanner:is(:focus-visible, .picked)) .cat-head { opacity: 0; transition: opacity 0.5s ease 0.14s; }
 @media (hover: hover) {
   .title-list:has(.tbanner:hover) .tbanner:not(:hover, :focus-visible, .picked),
-  .title-list:has(.tbanner:hover) .cat-head { opacity: 0.2; }
+  .title-list:has(.tbanner:hover) .cat-head { opacity: 0; transition: opacity 0.5s ease 0.14s; }
 }
 .cat-head { transition: opacity 0.45s ease; }
 

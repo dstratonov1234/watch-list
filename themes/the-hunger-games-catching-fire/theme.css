@@ -283,9 +283,10 @@
 @keyframes cf-st-flash { 0% { opacity: 0; } 1.2% { opacity: 0.9; } 5% { opacity: 0.1; } 11% { opacity: 0.6; } 21%, 100% { opacity: 0; } }
 @keyframes cf-st-bolt { 0% { opacity: 0; } 1.2% { opacity: 1; } 4.5% { opacity: 0.12; } 11% { opacity: 0.85; } 15%, 100% { opacity: 0; } }
 
-/* туман над водой: две полосы разного масштаба плывут навстречу */
+/* туман над водой: две полосы разного масштаба плывут навстречу; сверху и снизу каждая растворяется —
+   сцену видно целиком, и прямой край слоя сразу бросается в глаза */
 .stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-mist { inset: 16vw 0 0; overflow: hidden; opacity: 0.55; }
-.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-mist i { position: absolute; left: 0; bottom: 8%; width: calc(100% + 170vw); height: 62%; background: url(assets/mist.webp) 0 100% / 170vw auto repeat-x; }
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-mist i { position: absolute; left: 0; bottom: 8%; width: calc(100% + 170vw); height: 62%; background: url(assets/mist.webp) 0 100% / 170vw auto repeat-x; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 40%, #000 62%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 40%, #000 62%, transparent 100%); }
 .stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-mist i + i { left: -120vw; bottom: 34%; width: calc(100% + 240vw); height: 46%; background-size: 120vw auto; opacity: 0.7; }
 .stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-mist i { animation: cf-st-mist 95s linear infinite; }
 .stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-mist i + i { animation: cf-st-mist2 70s linear infinite; }
