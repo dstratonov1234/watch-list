@@ -268,9 +268,11 @@ body.leaving #list-view {
 
 .cat.collapsed .cat-body { grid-template-rows: 0fr; opacity: 0; }
 
+/* Баннер тайтла — какой угодно формы: тема вправе выйти за свою полосу (крылья, пламя, рваный край),
+   список его не обрезает. Обрезка включается только на время сворачивания и разворачивания категории. */
 .cat-inner {
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -278,6 +280,9 @@ body.leaving #list-view {
   margin: 0 -10px;
   padding: 10px 10px 14px;
 }
+.cat:is(.collapsed, .moving) .cat-inner { overflow: hidden; }
+/* тот баннер, на который навели, — поверх соседей: его выступающие части не прячутся под следующим */
+.tbanner:is(:hover, :focus-visible, .picked) { z-index: 2; }
 
 /* ---------- Баннер тайтла ---------- */
 /* Переменные темы тайтла (--bg, --text, --accent, шрифты) приходят через .themed-card;

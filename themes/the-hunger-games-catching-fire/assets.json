@@ -1,6 +1,6 @@
 {
   "model": "gpt-image-2.5-flare",
-  "notes": "burn.webp — не из модели: рваная обугленная кромка с тлеющим краем делается скриптом themes/the-hunger-games-catching-fire/burn.py (шум, порог, свечение), бесшовная по горизонтали. Тот же скрипт доводит flames.webp и sparks.webp: убирает чёрный фон (яркость → прозрачность), а огонь склеивает с его зеркальной копией в бесшовную полосу 2048 px — после перегенерации flames или sparks запустить его снова.",
+  "notes": "burn.webp — не из модели: рваная обугленная кромка с тлеющим краем делается скриптом themes/the-hunger-games-catching-fire/burn.py (шум, порог, свечение), бесшовная по горизонтали. Тот же скрипт доводит flames.webp, sparks.webp, bolt.webp и mist.webp: убирает чёрный фон (яркость → прозрачность), а огонь и туман склеивает с зеркальной копией в бесшовную полосу — после перегенерации любого из них запустить его снова.",
   "assets": [
     {
       "name": "flames",
@@ -37,6 +37,33 @@
       "max_width": 1400,
       "trim": false,
       "prompt": "Macro photograph of overlapping black bird feathers filling the whole frame edge to edge, layered like the surface of a spread wing, with a deep blue and charcoal iridescent sheen; the tips of a few feathers glow with tiny orange embers as if freshly singed. Dark, dramatic, low-key lighting, very dark overall. Wide composition, evenly detailed. No bird head, no eyes, no people, no text, no letters."
+    },
+    {
+      "name": "arena",
+      "size": "1536x1024",
+      "background": "opaque",
+      "quality": "high",
+      "max_width": 1536,
+      "trim": false,
+      "prompt": "Cinematic matte painting at night, a wide high-angle view from above a tropical beach looking across a perfectly circular saltwater lagoon. In the center of the water sits a small rocky island with a large metallic horn-shaped structure on it, and twelve narrow straight rocky strips run from the island to the shore like the spokes of a wheel, dividing the water into equal wedges like a clock face. Around the lagoon lies a ring of pale sand and beyond it dense dark jungle. On the far shore, slightly right of center, one enormous ancient tree towers high above the jungle canopy against the sky. Heavy storm clouds overhead, cold moonlight breaking through and glinting on the water, a very faint hexagonal honeycomb shimmer high in the sky like an energy dome. Deep teal, indigo and violet palette, rich detail, dramatic and beautiful. The bottom corners are framed by dark foreground palm leaves. No lightning bolt, no people, no animals, no text, no letters."
+    },
+    {
+      "name": "bolt",
+      "size": "1024x1536",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 1024,
+      "trim": false,
+      "prompt": "A single huge branching lightning bolt striking straight down, photographed against a pure black background. The bright white-violet main channel runs from the top center of the frame to the bottom center, with many fine jagged side branches and a soft blue-violet glow around it. Photorealistic, high contrast. No clouds, no ground, no trees, no text, no letters."
+    },
+    {
+      "name": "mist",
+      "size": "1536x1024",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 1536,
+      "trim": false,
+      "prompt": "Thin wisps of low drifting fog photographed against a pure black background: soft pale horizontal streaks and curls of mist, uneven and airy, denser in the lower half and fading to nothing toward the top, the left and right edges look alike. Monochrome pale grey-white. No ground, no objects, no light source, no text, no letters."
     }
   ]
 }

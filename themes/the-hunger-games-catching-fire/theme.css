@@ -4,14 +4,17 @@
    в белом свадебном платье с тлеющим подолом; отметить фильм — «покружиться»: огонь поднимается от подола, и она
    оказывается лицом к нам в наряде сойки-пересмешницы. Опросник — интервью у Цезаря; оценка — насколько вспыхнуло
    пламя: цифра в огне. Следующая часть серии — «следующий выход».
-   Палитра: жемчужно-белый платья, уголь и перо, огонь и золото эмблемы; на главной — холодная голограмма
-   арены-часов.
+   Палитра: жемчужно-белый платья, уголь и перо, огонь и золото эмблемы; на главной — ночная арена-часы
+   в грозу.
    Горящая кромка (assets/burn.webp, 290 px, строка стыка 170), огонь и искры с прозрачностью — см. burn.py.
    ============================================================================ */
 
 /* ---------------------------------------------------------------- баннер --- */
-/* Полоса ткани. Не смотрел — белое платье с тлеющим подолом: наведение уводит огонь вверх по ткани, и под ней
-   открывается наряд сойки. Посмотрел — сгорело целиком: крылья и обугленный верхний край. */
+/* Не прямоугольник, а вещь — и до просмотра, и после она другая.
+   Не смотрел — кружевная лента от свадебного платья: фестончатый верх, концы «ласточкиным хвостом», подол тлеет;
+   наведение уводит огонь вверх по ткани (кромка выходит за верх ленты), и под ней открывается наряд сойки.
+   Посмотрел — обгоревший лоскут: рваные края со всех сторон (assets/rag-*.webp), по ним тлеет кайма
+   (assets/ember-*.webp), внутри — крылья. Список баннеры не обрезает, так что всё, что выступает, видно. */
 
 .tbanner[data-title="the-hunger-games-catching-fire"] {
   --cf-char: #0b0807;
@@ -20,6 +23,7 @@
   --cf-pearl: #f5ede3;
   --cf-band: 76px; /* кромка на баннере: 290 → 76 */
   --cf-join: 44.6px; /* её строка стыка: 170 → 44.6 */
+  --cf-ribbon: polygon(0 0, 100% 0, calc(100% - 30px) 50%, 100% 100%, 0 100%, 30px 50%); /* концы ленты */
   height: 212px;
   overflow: visible;
   border: 0;
@@ -38,7 +42,7 @@
   outline: none;
 }
 
-.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b { position: absolute; inset: 0; display: block; overflow: hidden; background: var(--cf-char); }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b { position: absolute; inset: 0; display: block; }
 .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b > span { position: absolute; display: block; }
 
 /* белое платье: ткань под холодным прожектором и невеста справа */
@@ -46,6 +50,10 @@
   inset: 0;
   overflow: hidden;
   isolation: isolate; /* оттиск названия остаётся в ткани — под огнём и углём, а не поверх них */
+  clip-path: var(--cf-ribbon);
+  /* кружевной край: ряд фестонов поверху */
+  -webkit-mask: radial-gradient(circle at 50% 100%, #000 0 12.4px, transparent 13.2px) 0 0 / 26px 13px repeat-x, linear-gradient(#000, #000) 0 12.5px / 100% calc(100% - 12.5px) no-repeat;
+  mask: radial-gradient(circle at 50% 100%, #000 0 12.4px, transparent 13.2px) 0 0 / 26px 13px repeat-x, linear-gradient(#000, #000) 0 12.5px / 100% calc(100% - 12.5px) no-repeat;
   background:
     radial-gradient(70% 120% at 36% 30%, rgba(255, 255, 255, 0) 0, rgba(120, 130, 156, 0.3) 62%, rgba(58, 64, 86, 0.62) 100%),
     url(assets/lace.webp) 30% 42% / max(100%, 900px) auto;
@@ -96,6 +104,8 @@
   object-position: 50% 19%; /* голова и крылья: 13–45 % высоты кадра */
   transition: filter 0.6s, transform 1.6s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
+/* пока лента цела, наряд под огнём повторяет её концы */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b:not(.seen) .cf-b-dark { clip-path: var(--cf-ribbon); }
 /* под название слева — тень */
 .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-dark::after {
   content: "";
@@ -125,8 +135,8 @@
 
 /* название: на ткани — чёрным оттиском (его съедает огонь), на наряде сойки — золотом (его огонь открывает) */
 .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name { position: absolute; left: 34px; z-index: 2; display: block; width: min(430px, 47%); }
-.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.ink { top: 26px; transition: opacity 0.25s ease; }
-.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.gold { top: 30px; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.ink { top: 34px; left: 52px; transition: opacity 0.25s ease; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.gold { top: 38px; left: 48px; }
 .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-logo { display: block; width: 100%; height: auto; }
 .tbanner[data-title="the-hunger-games-catching-fire"] .ink .cf-b-logo { filter: brightness(0) drop-shadow(0 1px 0 rgba(255, 255, 255, 0.6)); opacity: 0.88; }
 .tbanner[data-title="the-hunger-games-catching-fire"] .gold .cf-b-logo { filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85)); }
@@ -134,12 +144,13 @@
 .tbanner[data-title="the-hunger-games-catching-fire"] .gold .cf-b-title { color: var(--cf-gold); }
 .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-logo + .cf-b-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* наведение на белое: огонь уходит по ткани почти доверху — виден наряд сойки целиком, оттиск гаснет */
+/* наведение на белое: огонь уходит по ткани почти доверху, его кромка чуть выходит за ленту — виден наряд сойки,
+   оттиск гаснет */
 @media (hover: hover) {
-  .tbanner[data-title="the-hunger-games-catching-fire"]:hover .cf-b:not(.seen) :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: 12px; }
+  .tbanner[data-title="the-hunger-games-catching-fire"]:hover .cf-b:not(.seen) :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: 30px; }
   .tbanner[data-title="the-hunger-games-catching-fire"]:hover .cf-b:not(.seen) .cf-b-name.ink { opacity: 0; }
 }
-.tbanner[data-title="the-hunger-games-catching-fire"]:focus-visible .cf-b:not(.seen) :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: 12px; }
+.tbanner[data-title="the-hunger-games-catching-fire"]:focus-visible .cf-b:not(.seen) :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: 30px; }
 .tbanner[data-title="the-hunger-games-catching-fire"]:focus-visible .cf-b:not(.seen) .cf-b-name.ink { opacity: 0; }
 .tbanner[data-title="the-hunger-games-catching-fire"]:is(:hover, .picked, :focus-visible) .cf-b-sparks { opacity: 0.85; }
 .tbanner[data-title="the-hunger-games-catching-fire"]:is(:hover, .picked, :focus-visible) .cf-b-sparks::before { animation: cf-sparks-up 7s linear infinite; }
@@ -150,14 +161,30 @@
 /* фокус с клавиатуры — золотая нить по краю */
 .tbanner[data-title="the-hunger-games-catching-fire"]:focus-visible .cf-b::after { content: ""; position: absolute; inset: 0; z-index: 5; border: 2px solid var(--cf-gold); box-shadow: inset 0 0 0 2px rgba(11, 8, 7, 0.85); pointer-events: none; }
 
-/* посмотрел: ткани нет, наряд сойки целиком, сверху — обугленный край; наведение — искры и свет прожекторов */
-.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen .cf-b-cloth { display: none; }
-.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: 0px; transition: none; }
+/* посмотрел: ленты нет — обгоревший лоскут. Рваные края: верх и низ — маска на кадре, концы — маска на окне
+   (две маски на вложенных слоях пересекаются); по верху и низу тлеет кайма ровно по той же кривой.
+   Наведение — искры и свет прожекторов. */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen :is(.cf-b-cloth, .cf-b-edge) { display: none; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen :is(.cf-b-win, .cf-b-dark) { --y: 0px; transition: none; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen .cf-b-win {
+  height: 100%;
+  -webkit-mask: url(assets/rag-l.webp) 0 0 / 40px auto repeat-y, url(assets/rag-r.webp) 100% 0 / 40px auto repeat-y, linear-gradient(#000, #000) 39px 0 / calc(100% - 78px) 100% no-repeat;
+  mask: url(assets/rag-l.webp) 0 0 / 40px auto repeat-y, url(assets/rag-r.webp) 100% 0 / 40px auto repeat-y, linear-gradient(#000, #000) 39px 0 / calc(100% - 78px) 100% no-repeat;
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen .cf-b-dark {
+  -webkit-mask: url(assets/rag-t.webp) 0 0 / auto 40px repeat-x, url(assets/rag-b.webp) 0 100% / auto 40px repeat-x, linear-gradient(#000, #000) 0 39px / 100% calc(100% - 78px) no-repeat;
+  mask: url(assets/rag-t.webp) 0 0 / auto 40px repeat-x, url(assets/rag-b.webp) 0 100% / auto 40px repeat-x, linear-gradient(#000, #000) 0 39px / 100% calc(100% - 78px) no-repeat;
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-ember { display: none; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen .cf-b-ember { position: absolute; left: 0; right: 0; display: block; height: 40px; pointer-events: none; transition: filter 0.5s; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-ember.t { top: 0; background: url(assets/ember-t.webp) 0 0 / auto 40px repeat-x; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-ember.b { bottom: 0; background: url(assets/ember-b.webp) 0 100% / auto 40px repeat-x; opacity: 0.75; }
+.tbanner[data-title="the-hunger-games-catching-fire"]:is(:hover, .picked, :focus-visible) .cf-b.seen .cf-b-ember { filter: brightness(1.5); }
 .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen .cf-b-dark .cf-b-art { filter: brightness(0.84) saturate(0.95); }
 .tbanner[data-title="the-hunger-games-catching-fire"]:is(:hover, .picked, :focus-visible) .cf-b.seen .cf-b-dark .cf-b-art { filter: brightness(1.12) saturate(1.12); transform: scale(1.035); }
 
 /* оценка — цифра в огне, в прожжённой в кадре дыре с тлеющим краем */
-.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score { position: absolute; right: 54px; top: 50%; z-index: 3; display: block; isolation: isolate; translate: 0 -46%; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score { position: absolute; right: 76px; top: 50%; z-index: 3; display: block; isolation: isolate; translate: 0 -46%; }
 .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score::before {
   content: "";
   position: absolute;
@@ -206,74 +233,75 @@
 @keyframes cf-sparks-up { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -420px, 0); } }
 
 @media (max-width: 640px) {
-  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name { left: 18px; width: min(300px, 60%); }
-  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.ink { top: 18px; }
-  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.gold { top: 22px; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] { --cf-ribbon: polygon(0 0, 100% 0, calc(100% - 16px) 50%, 100% 100%, 0 100%, 16px 50%); }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name { width: min(300px, 60%); }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.ink { top: 26px; left: 26px; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.gold { top: 30px; left: 30px; }
   .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-cloth .cf-b-art { right: -34%; top: 2%; height: 118%; }
-  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score { right: 26px; top: 66%; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score { right: 44px; top: 64%; }
   .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score::before { inset: -18px -34px -22px; }
   .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score b { font-size: 60px; }
   .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-dark::after { background: linear-gradient(180deg, rgba(11, 8, 7, 0.86) 0, rgba(11, 8, 7, 0.3) 42%, rgba(11, 8, 7, 0) 60%); }
 }
 
 /* -------------------------------------------------- сцена при наведении --- */
-/* «Тик-так»: голограмма арены-часов из зала распорядителей. Диск лежит в перспективе во весь экран (баннеры
-   списка непрозрачны — видны дальняя дуга берега над списком и спицы в просветах), свет идёт по двенадцати
-   секторам шагами — как стрелка; из-под баннера поднимаются искры. */
+/* Полночь на арене-часах. Фон — написанная картина (assets/arena.webp): лагуна с двенадцатью спицами и Рогом
+   изобилия, джунгли, высокое дерево на дальнем берегу. В дерево раз за разом бьёт молния и на миг освещает всю
+   арену; по воде тянется туман; из-под баннера поднимаются искры. Картина привязана к верху окна: над списком
+   видны небо, луна и купол, по краям и внизу — берег и джунгли.
+   Положение молнии посчитано под эту картину: вершина дерева — 70 % по ширине и 9 % по высоте. */
 
-.stage-layer[data-title="the-hunger-games-catching-fire"] { overflow: hidden; background: radial-gradient(90% 70% at var(--bcx, 50%) var(--bcy, 40%), #150c08 0, #0b0807 50%, #050303 100%); }
+.stage-layer[data-title="the-hunger-games-catching-fire"] { overflow: hidden; background: #060914; }
 .stage-layer[data-title="the-hunger-games-catching-fire"] > div { position: absolute; }
 
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-arena { inset: 0; transform-origin: 62% 0; }
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-arena { animation: cf-st-drift 26s ease-in-out infinite alternate; }
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-arena i { position: absolute; }
+.stage-layer[data-title="the-hunger-games-catching-fire"] :is(.cf-st-night, .cf-st-flash) { inset: 0; background: url(assets/arena.webp) 50% 0 / cover no-repeat; }
+/* вспышка: та же картина, высветленная вокруг дерева */
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-flash {
+  filter: brightness(2.2) saturate(1.1) contrast(1.05);
+  -webkit-mask-image: radial-gradient(95% 110% at 70% 6%, #000 0, rgba(0, 0, 0, 0.6) 40%, transparent 100%);
+  mask-image: radial-gradient(95% 110% at 70% 6%, #000 0, rgba(0, 0, 0, 0.6) 40%, transparent 100%);
+  opacity: 0;
+}
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-bolt {
+  left: calc(70% - 9vw);
+  top: -19.6vw; /* низ молнии — на вершине дерева: 6,4vw от верха при картине во всю ширину */
+  width: 18vw;
+  height: 27vw;
+  background: url(assets/bolt.webp) 50% 100% / contain no-repeat;
+  opacity: 0;
+}
+/* два всполоха подряд, потом тишина: чаще трёх вспышек в секунду не мигаем */
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-flash { animation: cf-st-flash 7s linear 1.1s infinite; }
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-bolt { animation: cf-st-bolt 7s linear 1.1s infinite; }
+/* клик по баннеру: молния бьёт сразу — следом поднимается огонь заставки */
+.stage-layer[data-title="the-hunger-games-catching-fire"].cf-strike .cf-st-flash { animation: cf-st-flash 5s linear both; }
+.stage-layer[data-title="the-hunger-games-catching-fire"].cf-strike .cf-st-bolt { animation: cf-st-bolt 5s linear both; }
+@keyframes cf-st-drift { to { transform: scale(1.05); } }
+@keyframes cf-st-flash { 0% { opacity: 0; } 1.2% { opacity: 0.9; } 5% { opacity: 0.1; } 11% { opacity: 0.6; } 21%, 100% { opacity: 0; } }
+@keyframes cf-st-bolt { 0% { opacity: 0; } 1.2% { opacity: 1; } 4.5% { opacity: 0.12; } 11% { opacity: 0.85; } 15%, 100% { opacity: 0; } }
+
+/* туман над водой: две полосы разного масштаба плывут навстречу */
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-mist { inset: 16vw 0 0; overflow: hidden; opacity: 0.55; }
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-mist i { position: absolute; left: 0; bottom: 8%; width: calc(100% + 170vw); height: 62%; background: url(assets/mist.webp) 0 100% / 170vw auto repeat-x; }
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-mist i + i { left: -120vw; bottom: 34%; width: calc(100% + 240vw); height: 46%; background-size: 120vw auto; opacity: 0.7; }
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-mist i { animation: cf-st-mist 95s linear infinite; }
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-mist i + i { animation: cf-st-mist2 70s linear infinite; }
+@keyframes cf-st-mist { to { transform: translate3d(-170vw, 0, 0); } }
+@keyframes cf-st-mist2 { to { transform: translate3d(120vw, 0, 0); } }
+
+/* огонь занимается от баннера: тёплый отсвет под ним и искры */
 .stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-glow {
   left: var(--bcx, 50%);
   top: calc(var(--bcy, 40%) + var(--bh, 212px) / 2);
-  width: calc(var(--bw, 1100px) * 1.25);
-  height: 420px;
+  width: calc(var(--bw, 1100px) * 1.3);
+  height: 460px;
   translate: -50% -42%;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 122, 40, 0.34) 0, rgba(255, 122, 40, 0.1) 45%, rgba(255, 122, 40, 0) 70%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 122, 40, 0.42) 0, rgba(255, 122, 40, 0.14) 45%, rgba(255, 122, 40, 0) 70%);
 }
-
-.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-arena {
-  left: 50%;
-  top: 57%;
-  width: 134vw;
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  transform: perspective(2600px) rotateX(52deg);
-  opacity: 0;
-  transition: opacity 0.9s ease 0.1s;
-}
-.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-arena { opacity: 1; }
-.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-arena i { position: absolute; inset: 0; border-radius: 50%; }
-/* вода, двенадцать спиц, остров с Рогом изобилия */
-.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-disc {
-  background:
-    radial-gradient(circle, rgba(190, 240, 255, 0.95) 0 1.1%, rgba(150, 228, 255, 0.35) 1.3% 2.6%, rgba(150, 228, 255, 0) 2.8%),
-    repeating-conic-gradient(from -0.3deg, rgba(150, 228, 255, 0.75) 0 0.6deg, rgba(150, 228, 255, 0) 0.6deg 30deg),
-    radial-gradient(circle, rgba(24, 92, 112, 0.5) 0, rgba(14, 58, 74, 0.34) 45%, rgba(8, 30, 40, 0.2) 69%);
-  -webkit-mask-image: radial-gradient(circle, #000 0 69.6%, transparent 69.8%);
-  mask-image: radial-gradient(circle, #000 0 69.6%, transparent 69.8%);
-}
-/* берег и кольцо джунглей */
-.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-rim {
-  background:
-    radial-gradient(circle, rgba(150, 228, 255, 0) 69.5%, rgba(170, 236, 255, 0.9) 69.8% 70.2%, rgba(150, 228, 255, 0) 70.5%),
-    radial-gradient(circle, rgba(150, 228, 255, 0) 70.4%, rgba(60, 150, 130, 0.16) 71% 96%, rgba(150, 228, 255, 0) 100%),
-    repeating-conic-gradient(from 14.7deg, rgba(150, 228, 255, 0.5) 0 0.6deg, rgba(150, 228, 255, 0) 0.6deg 30deg);
-  -webkit-mask-image: radial-gradient(circle, transparent 0 69.4%, #000 69.6% 100%);
-  mask-image: radial-gradient(circle, transparent 0 69.4%, #000 69.6% 100%);
-}
-/* стрелка: сектор текущего часа */
-.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-hand {
-  background: conic-gradient(from -15deg, rgba(255, 150, 60, 0.7) 0 30deg, rgba(255, 150, 60, 0) 30deg);
-  -webkit-mask-image: radial-gradient(circle, transparent 0 2.8%, #000 3% 69.6%, transparent 69.8%);
-  mask-image: radial-gradient(circle, transparent 0 2.8%, #000 3% 69.6%, transparent 69.8%);
-}
-.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-hand { animation: cf-tick 12s steps(12, end) infinite, cf-tock 1s ease-out infinite; }
-@keyframes cf-tick { to { rotate: 360deg; } }
-@keyframes cf-tock { 0% { opacity: 1; } 18% { opacity: 0.75; } 100% { opacity: 0.32; } }
-
-.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-sparks { inset: 0; overflow: hidden; opacity: 0.8; -webkit-mask-image: radial-gradient(70% 60% at var(--bcx, 50%) var(--bcy, 40%), #000 0, transparent 100%); mask-image: radial-gradient(70% 60% at var(--bcx, 50%) var(--bcy, 40%), #000 0, transparent 100%); }
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-sparks { inset: 0; overflow: hidden; opacity: 0.85; -webkit-mask-image: radial-gradient(70% 60% at var(--bcx, 50%) var(--bcy, 40%), #000 0, transparent 100%); mask-image: radial-gradient(70% 60% at var(--bcx, 50%) var(--bcy, 40%), #000 0, transparent 100%); }
 .stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-sparks i { position: absolute; left: 0; top: 0; width: 100%; height: calc(100% + 900px); background: url(assets/sparks.webp) 0 0 / 900px 900px; }
 .stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-sparks i + i { background-size: 560px 560px; background-position: 210px 0; opacity: 0.6; height: calc(100% + 560px); }
 .stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-sparks i { animation: cf-st-up 26s linear infinite; }

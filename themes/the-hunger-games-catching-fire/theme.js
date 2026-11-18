@@ -57,6 +57,8 @@
   const decoded = (img, ms) =>
     Promise.race([img?.decode ? img.decode().catch(() => {}) : Promise.resolve(), new Promise((r) => setTimeout(r, ms))]);
 
+  const stageLayer = () => document.querySelector('.stage-layer[data-title="the-hunger-games-catching-fire"]');
+
   // Заставка: стена огня поднимается снизу и оставляет за собой уголь; на угле — эмблема фильма и название.
   function coverHtml(item, esc) {
     const logo = isUrl(item.logo) ? `<img src="${esc(item.logo)}" alt="">` : "";
@@ -73,8 +75,9 @@
 
   window.TitleThemes.register("the-hunger-games-catching-fire", {
     // ------------------------------------------------------------ баннер ---
-    // Полоса ткани. Не смотрел — белое платье с тлеющим подолом (наведение — огонь уходит вверх по ткани,
-    // под ней наряд сойки); посмотрел — сгорело целиком: крылья. Счёта у фильма нет, прогресс — сам наряд.
+    // Не прямоугольник, а вещь. Не смотрел — кружевная лента от свадебного платья: фестончатый верх, концы
+    // «ласточкиным хвостом», подол тлеет (наведение — огонь уходит вверх по ткани, под ней наряд сойки).
+    // Посмотрел — обгоревший лоскут с рваными тлеющими краями: крылья. Счёта у фильма нет, прогресс — сам наряд.
     banner(b) {
       const { progress: p, esc, item } = b;
       const seen = p.status === "completed";
@@ -91,7 +94,7 @@
       b.el.innerHTML = `
         <span class="cf-b ${seen ? "seen" : ""} ${judged ? `judged ${tierOf(b.score)}` : ""}">
           <span class="cf-b-cloth">${bride ? `<img class="cf-b-art" src="${esc(bride)}" alt="" decoding="async">` : ""}${name("ink", seen)}</span>
-          <span class="cf-b-win"><span class="cf-b-dark">${mock ? `<img class="cf-b-art" src="${esc(mock)}" alt="" decoding="async">` : b.art.hero('class="cf-b-art" alt="" decoding="async"')}${name("gold", !seen)}${score}</span></span>
+          <span class="cf-b-win"><span class="cf-b-dark">${mock ? `<img class="cf-b-art" src="${esc(mock)}" alt="" decoding="async">` : b.art.hero('class="cf-b-art" alt="" decoding="async"')}${name("gold", !seen)}${score}</span><span class="cf-b-ember t" aria-hidden="true"></span><span class="cf-b-ember b" aria-hidden="true"></span></span>
           <span class="cf-b-sparks" aria-hidden="true"></span>
           <span class="cf-b-edge" aria-hidden="true"></span>
         </span>`;
@@ -99,12 +102,14 @@
     },
 
     // ----------------------------------------------- сцена при наведении ---
-    // «Тик-так»: голограмма арены-часов из зала распорядителей. Двенадцать секторов, свет идёт по ним шагами,
-    // как часовая стрелка; из-под баннера поднимаются искры.
+    // Полночь на арене-часах: лагуна с двенадцатью каменными спицами и Рогом изобилия на острове, джунгли,
+    // высокое дерево на дальнем берегу — и молния, которая бьёт в него раз за разом. По воде тянется туман,
+    // из-под баннера поднимаются искры. Сама картина — написанный фон (assets/arena.webp), а не разметка.
     stage(s) {
       s.el.innerHTML = `
+        <div class="cf-st-arena"><i class="cf-st-night"></i><i class="cf-st-flash"></i><i class="cf-st-bolt"></i></div>
+        <div class="cf-st-mist"><i></i><i></i></div>
         <div class="cf-st-glow"></div>
-        <div class="cf-st-arena"><i class="cf-st-disc"></i><i class="cf-st-hand"></i><i class="cf-st-rim"></i></div>
         <div class="cf-st-sparks"><i></i><i></i></div>`;
       // кадр для страницы — заранее, пока курсор на баннере
       preload(pic(s.item, s.progress.status === "completed" ? "front" : "white"));
@@ -112,6 +117,7 @@
 
     // ---------------------------------------------------------- заставка ---
     cover(t) {
+      stageLayer()?.classList.add("cf-strike"); // по клику молния бьёт сразу — и снизу поднимается огонь
       const layer = t.layer("cf-cover");
       layer.innerHTML = coverHtml(t.item, t.esc);
       t.data.started = performance.now();
@@ -146,6 +152,7 @@
       ctx.onCleanup(() => {
         alive = false;
         timers.forEach(clearTimeout);
+        stageLayer()?.classList.remove("cf-strike"); // сцена главной снова в покое
       });
 
       const hero = isUrl(item.hero) ? item.hero : "";

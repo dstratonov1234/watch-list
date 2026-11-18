@@ -799,6 +799,10 @@
     const sec = btn.closest(".cat");
     const collapsed = !sec.classList.contains("collapsed");
     sec.classList.toggle("collapsed", collapsed);
+    // пока категория сворачивается или разворачивается, её содержимое обрезается; в покое баннеры не режутся
+    sec.classList.add("moving");
+    clearTimeout(sec._moving);
+    sec._moving = setTimeout(() => sec.classList.remove("moving"), 520);
     btn.setAttribute("aria-expanded", String(!collapsed));
     sec.querySelector(".cat-body").inert = collapsed;
     if (collapsed) state.collapsed.add(sec.dataset.cat);

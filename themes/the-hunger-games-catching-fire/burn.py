@@ -113,3 +113,56 @@ def key_black(name, width, mirror=False):
 
 key_black("flames.webp", 1024, mirror=True)
 key_black("sparks.webp", 640)
+key_black("bolt.webp", 640)
+key_black("mist.webp", 1024, mirror=True)
+
+
+def rag_edges(depth=40, length=2048, side=512):
+    """Рваные края для сгоревшего лоскута (баннер просмотренного фильма): маски и тлеющая кайма.
+    rag-t/rag-b — верхний и нижний край (полоса length×depth, бесшовная по ширине), rag-l/rag-r — левый и правый
+    (depth×side, бесшовные по высоте). В маске непрозрачно то, что осталось от ткани. ember-t/ember-b — тлеющая
+    линия ровно по тому же краю: кладётся поверх и совпадает с маской."""
+    out = os.path.dirname(path)
+
+    def curve(n, freqs, amps):
+        x = np.arange(n, dtype=np.float32) / n * 2 * np.pi
+        y = np.zeros(n, dtype=np.float32)
+        for f, a in zip(freqs, amps):
+            y += a * np.sin(f * x + rng.uniform(0, 2 * np.pi))
+        y /= sum(amps)
+        return depth * 0.5 + (depth * 0.5 - 5) * y  # 5 … depth − 5
+
+    def save(arr, name, lossless=True):
+        p = os.path.join(out, name)
+        Image.fromarray(arr.astype(np.uint8), "RGBA").save(p, "WEBP", lossless=lossless, quality=90, method=6)
+        print(p, f"{os.path.getsize(p) // 1024} КБ")
+
+    # верхний край: непрозрачно ниже кривой
+    c = curve(length, [5, 11, 23, 47, 97, 191], [1.0, 0.8, 0.6, 0.4, 0.25, 0.12])
+    yy = np.arange(depth, dtype=np.float32)[:, None]
+    d = yy - c[None, :]  # > 0 — внутри ткани
+    a = smooth(-0.8, 0.8, d)
+    mask = np.dstack([np.full((depth, length, 3), 255, np.float32), a * 255])
+    save(mask, "rag-t.webp")
+    save(mask[::-1], "rag-b.webp")
+    # тлеющая линия по этому же краю: каление на самой кромке, отсвет наружу, уголь внутрь
+    heat_ = 0.7 + 0.5 * (np.sin(np.arange(length) / length * 2 * np.pi * 9 + 1.3) * 0.5 + 0.5)[None, :]
+    line = np.exp(-np.abs(d) / (1.6 * heat_))
+    halo = np.where(d < 0, 0.5 * np.exp(d / (7.0 * heat_)), 0.55 * np.exp(-d / 5.0))
+    al = np.clip(line + halo, 0, 1)
+    col = np.where(line[..., None] > 0.55, np.array([255, 226, 150], np.float32), np.array([255, 128, 40], np.float32))
+    col = np.where((d > 2.5)[..., None], np.array([120, 30, 10], np.float32), col)
+    ember = np.dstack([col, al * 255])
+    save(ember, "ember-t.webp", lossless=False)
+    save(ember[::-1], "ember-b.webp", lossless=False)
+    # левый и правый край: та же идея, кривая идёт по высоте
+    c2 = curve(side, [3, 7, 13, 29, 61], [1.0, 0.8, 0.55, 0.35, 0.2])
+    xx = np.arange(depth, dtype=np.float32)[None, :]
+    d2 = xx - c2[:, None]
+    a2 = smooth(-0.8, 0.8, d2)
+    mask2 = np.dstack([np.full((side, depth, 3), 255, np.float32), a2 * 255])
+    save(mask2, "rag-l.webp")
+    save(mask2[:, ::-1], "rag-r.webp")
+
+
+rag_edges()
