@@ -284,6 +284,17 @@ body.leaving #list-view {
 /* тот баннер, на который навели, — поверх соседей: его выступающие части не прячутся под следующим */
 .tbanner:is(:hover, :focus-visible, .picked) { z-index: 2; }
 
+/* Пока один баннер под курсором (в фокусе, выбран), остальные отступают — сцену этого тайтла за списком
+   видно целиком, а не в просветах. Условие — сам выбранный баннер, а не класс на body: после возврата
+   со страницы тайтла его сцена ещё включена, но ни один баннер не выбран — и ничего не гаснет. */
+.title-list:has(.tbanner:is(:focus-visible, .picked)) .tbanner:not(:focus-visible, .picked, :hover),
+.title-list:has(.tbanner:is(:focus-visible, .picked)) .cat-head { opacity: 0.2; }
+@media (hover: hover) {
+  .title-list:has(.tbanner:hover) .tbanner:not(:hover, :focus-visible, .picked),
+  .title-list:has(.tbanner:hover) .cat-head { opacity: 0.2; }
+}
+.cat-head { transition: opacity 0.45s ease; }
+
 /* ---------- Баннер тайтла ---------- */
 /* Переменные темы тайтла (--bg, --text, --accent, шрифты) приходят через .themed-card;
    своё оформление баннера каждая тема делает в themes/<id>/theme.css: .tbanner[data-title="<id>"]. */
@@ -950,7 +961,7 @@ html.themed .neighbor:hover {
 }
 @keyframes fog-drift { from { transform: translate3d(-6%, 0, 0) scale(1.05); } to { transform: translate3d(6%, -3%, 0) scale(1.15); } }
 
-.tbanner { transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s, border-color 0.35s, opacity 0.3s; }
+.tbanner { transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s, border-color 0.35s, opacity 0.45s ease; }
 
 /* ---------- Общее ---------- */
 
