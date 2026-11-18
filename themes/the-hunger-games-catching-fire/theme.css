@@ -1,0 +1,800 @@
+/* ============================================================================
+   Голодные игры: И вспыхнет пламя (2013) — «Наряд Цинны»
+   Образ: сцена шоу Цезаря Фликермана перед Квартальной бойней. Пока фильм не отмечен — Китнисс стоит спиной
+   в белом свадебном платье с тлеющим подолом; отметить фильм — «покружиться»: огонь поднимается от подола, и она
+   оказывается лицом к нам в наряде сойки-пересмешницы. Опросник — интервью у Цезаря; оценка — насколько вспыхнуло
+   пламя: цифра в огне. Следующая часть серии — «следующий выход».
+   Палитра: жемчужно-белый платья, уголь и перо, огонь и золото эмблемы; на главной — холодная голограмма
+   арены-часов.
+   Горящая кромка (assets/burn.webp, 290 px, строка стыка 170), огонь и искры с прозрачностью — см. burn.py.
+   ============================================================================ */
+
+/* ---------------------------------------------------------------- баннер --- */
+/* Полоса ткани. Не смотрел — белое платье с тлеющим подолом: наведение уводит огонь вверх по ткани, и под ней
+   открывается наряд сойки. Посмотрел — сгорело целиком: крылья и обугленный верхний край. */
+
+.tbanner[data-title="the-hunger-games-catching-fire"] {
+  --cf-char: #0b0807;
+  --cf-ember: #ff8a3c;
+  --cf-gold: #f3cf8a;
+  --cf-pearl: #f5ede3;
+  --cf-band: 76px; /* кромка на баннере: 290 → 76 */
+  --cf-join: 44.6px; /* её строка стыка: 170 → 44.6 */
+  height: 212px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--cf-pearl);
+  font-family: var(--t-body);
+}
+
+.tbanner[data-title="the-hunger-games-catching-fire"]:hover,
+.tbanner[data-title="the-hunger-games-catching-fire"]:focus-visible {
+  transform: none;
+  border: 0;
+  box-shadow: none;
+  outline: none;
+}
+
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b { position: absolute; inset: 0; display: block; overflow: hidden; background: var(--cf-char); }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b > span { position: absolute; display: block; }
+
+/* белое платье: ткань под холодным прожектором и невеста справа */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-cloth {
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate; /* оттиск названия остаётся в ткани — под огнём и углём, а не поверх них */
+  background:
+    radial-gradient(70% 120% at 36% 30%, rgba(255, 255, 255, 0) 0, rgba(120, 130, 156, 0.3) 62%, rgba(58, 64, 86, 0.62) 100%),
+    url(assets/lace.webp) 30% 42% / max(100%, 900px) auto;
+  filter: brightness(0.9);
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-cloth .cf-b-art {
+  position: absolute;
+  right: 0;
+  top: -9%;
+  height: 152%;
+  width: auto;
+  max-width: none;
+  filter: saturate(0.55);
+  /* слева кадр растворяется в ткани, справа — засвеченная панель кадра уходит в тень */
+  -webkit-mask-image: linear-gradient(90deg, transparent 24%, #000 54%, #000 80%, transparent 97%);
+  mask-image: linear-gradient(90deg, transparent 24%, #000 54%, #000 80%, transparent 97%);
+  transition: transform 1.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* наряд сойки: окно поднимается вместе с огнём, кадр внутри едет навстречу и потому стоит на месте */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-win,
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-edge {
+  --y: 213px; /* где сейчас линия огня: в покое — под самым подолом */
+  transform: translate3d(0, var(--y), 0);
+  transition: transform 1.15s cubic-bezier(0.3, 0.55, 0.2, 1);
+  will-change: transform;
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-win { left: 0; right: 0; top: 0; height: calc(100% + 60px); overflow: hidden; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-dark {
+  --y: 213px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 212px;
+  display: block;
+  background: url(assets/feathers.webp) center / cover;
+  transform: translate3d(0, calc(-1 * var(--y)), 0);
+  transition: transform 1.15s cubic-bezier(0.3, 0.55, 0.2, 1);
+  will-change: transform;
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-dark .cf-b-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 19%; /* голова и крылья: 13–45 % высоты кадра */
+  transition: filter 0.6s, transform 1.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+/* под название слева — тень */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-dark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(11, 8, 7, 0.9) 0, rgba(11, 8, 7, 0.55) 26%, rgba(11, 8, 7, 0) 46%);
+}
+
+/* горящая кромка */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-edge {
+  left: 0;
+  right: 0;
+  top: calc(-1 * var(--cf-join));
+  height: var(--cf-band);
+  background: url(assets/burn.webp) 0 0 / auto var(--cf-band) repeat-x;
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-sparks { inset: 0; overflow: hidden; opacity: 0; transition: opacity 0.7s; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-sparks::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 300%;
+  background: url(assets/sparks.webp) 0 0 / 420px 420px;
+}
+
+/* название: на ткани — чёрным оттиском (его съедает огонь), на наряде сойки — золотом (его огонь открывает) */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name { position: absolute; left: 34px; z-index: 2; display: block; width: min(430px, 47%); }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.ink { top: 26px; transition: opacity 0.25s ease; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.gold { top: 30px; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-logo { display: block; width: 100%; height: auto; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .ink .cf-b-logo { filter: brightness(0) drop-shadow(0 1px 0 rgba(255, 255, 255, 0.6)); opacity: 0.88; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .gold .cf-b-logo { filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85)); }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-title { display: block; font: 400 clamp(21px, 2.5vw, 30px) / 1.1 var(--t-display); letter-spacing: 0.14em; text-transform: uppercase; color: #1a1512; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .gold .cf-b-title { color: var(--cf-gold); }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-logo + .cf-b-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* наведение на белое: огонь уходит по ткани почти доверху — виден наряд сойки целиком, оттиск гаснет */
+@media (hover: hover) {
+  .tbanner[data-title="the-hunger-games-catching-fire"]:hover .cf-b:not(.seen) :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: 12px; }
+  .tbanner[data-title="the-hunger-games-catching-fire"]:hover .cf-b:not(.seen) .cf-b-name.ink { opacity: 0; }
+}
+.tbanner[data-title="the-hunger-games-catching-fire"]:focus-visible .cf-b:not(.seen) :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: 12px; }
+.tbanner[data-title="the-hunger-games-catching-fire"]:focus-visible .cf-b:not(.seen) .cf-b-name.ink { opacity: 0; }
+.tbanner[data-title="the-hunger-games-catching-fire"]:is(:hover, .picked, :focus-visible) .cf-b-sparks { opacity: 0.85; }
+.tbanner[data-title="the-hunger-games-catching-fire"]:is(:hover, .picked, :focus-visible) .cf-b-sparks::before { animation: cf-sparks-up 7s linear infinite; }
+.tbanner[data-title="the-hunger-games-catching-fire"]:is(:hover, .picked, :focus-visible) .cf-b-cloth .cf-b-art { transform: scale(1.04); }
+/* выбран: сгорает целиком, пока поднимается заставка */
+.tbanner[data-title="the-hunger-games-catching-fire"].picked .cf-b:not(.seen) :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: -60px; transition-duration: 0.6s; }
+.tbanner[data-title="the-hunger-games-catching-fire"].picked .cf-b:not(.seen) .cf-b-name.ink { opacity: 0; }
+/* фокус с клавиатуры — золотая нить по краю */
+.tbanner[data-title="the-hunger-games-catching-fire"]:focus-visible .cf-b::after { content: ""; position: absolute; inset: 0; z-index: 5; border: 2px solid var(--cf-gold); box-shadow: inset 0 0 0 2px rgba(11, 8, 7, 0.85); pointer-events: none; }
+
+/* посмотрел: ткани нет, наряд сойки целиком, сверху — обугленный край; наведение — искры и свет прожекторов */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen .cf-b-cloth { display: none; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen :is(.cf-b-win, .cf-b-edge, .cf-b-dark) { --y: 0px; transition: none; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.seen .cf-b-dark .cf-b-art { filter: brightness(0.84) saturate(0.95); }
+.tbanner[data-title="the-hunger-games-catching-fire"]:is(:hover, .picked, :focus-visible) .cf-b.seen .cf-b-dark .cf-b-art { filter: brightness(1.12) saturate(1.12); transform: scale(1.035); }
+
+/* оценка — цифра в огне, в прожжённой в кадре дыре с тлеющим краем */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score { position: absolute; right: 54px; top: 50%; z-index: 3; display: block; isolation: isolate; translate: 0 -46%; }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score::before {
+  content: "";
+  position: absolute;
+  inset: -30px -58px -34px;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgba(11, 8, 7, 0.95) 0, rgba(11, 8, 7, 0.92) 66%, rgba(255, 132, 44, 0.55) 73%, rgba(255, 132, 44, 0.14) 82%, rgba(255, 132, 44, 0) 100%);
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score b,
+.cf-score-num,
+.cf-r-num {
+  display: block;
+  font-family: "Forum", var(--t-display), serif;
+  font-weight: 400;
+  font-variant-numeric: lining-nums;
+  background: linear-gradient(180deg, #fff6d2 4%, #ffd67a 30%, #ff9a3c 58%, #e2501c 82%, #9c2410 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 16px rgba(255, 120, 40, 0.55)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8));
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score b { font-size: 92px; line-height: 0.9; }
+/* низкий огонь — тот же жар, но тише; тлеет — золото без огня; пепел — серым */
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.warm .cf-b-score b,
+.cf-score.warm .cf-score-num,
+.cf-talk.warm .cf-r-num {
+  background-image: linear-gradient(180deg, #ffe9b8 5%, #f7b45a 42%, #de6a22 80%, #9c3210 100%);
+  filter: drop-shadow(0 0 12px rgba(255, 130, 44, 0.4)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8));
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.mid .cf-b-score b,
+.cf-score.mid .cf-score-num,
+.cf-talk.mid .cf-r-num {
+  background-image: linear-gradient(180deg, #f6e3b2 5%, #e7b869 45%, #b9722c 90%);
+  filter: drop-shadow(0 0 8px rgba(243, 160, 70, 0.25)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8));
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.lo .cf-b-score b,
+.cf-score.lo .cf-score-num,
+.cf-talk.lo .cf-r-num {
+  background-image: linear-gradient(180deg, #d9d4cc 5%, #9d968d 50%, #5f5952 95%);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8));
+}
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.mid .cf-b-score::before { background: radial-gradient(closest-side, rgba(11, 8, 7, 0.95) 0, rgba(11, 8, 7, 0.92) 66%, rgba(243, 190, 110, 0.3) 73%, rgba(243, 190, 110, 0) 92%); }
+.tbanner[data-title="the-hunger-games-catching-fire"] .cf-b.lo .cf-b-score::before { background: radial-gradient(closest-side, rgba(11, 8, 7, 0.95) 0, rgba(11, 8, 7, 0.9) 68%, rgba(11, 8, 7, 0) 100%); }
+
+@keyframes cf-flame-lick { from { scale: 1 0.92; } to { scale: 1 1.1; } }
+@keyframes cf-sparks-up { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -420px, 0); } }
+
+@media (max-width: 640px) {
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name { left: 18px; width: min(300px, 60%); }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.ink { top: 18px; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-name.gold { top: 22px; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-cloth .cf-b-art { right: -34%; top: 2%; height: 118%; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score { right: 26px; top: 66%; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score::before { inset: -18px -34px -22px; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-score b { font-size: 60px; }
+  .tbanner[data-title="the-hunger-games-catching-fire"] .cf-b-dark::after { background: linear-gradient(180deg, rgba(11, 8, 7, 0.86) 0, rgba(11, 8, 7, 0.3) 42%, rgba(11, 8, 7, 0) 60%); }
+}
+
+/* -------------------------------------------------- сцена при наведении --- */
+/* «Тик-так»: голограмма арены-часов из зала распорядителей. Диск лежит в перспективе во весь экран (баннеры
+   списка непрозрачны — видны дальняя дуга берега над списком и спицы в просветах), свет идёт по двенадцати
+   секторам шагами — как стрелка; из-под баннера поднимаются искры. */
+
+.stage-layer[data-title="the-hunger-games-catching-fire"] { overflow: hidden; background: radial-gradient(90% 70% at var(--bcx, 50%) var(--bcy, 40%), #150c08 0, #0b0807 50%, #050303 100%); }
+.stage-layer[data-title="the-hunger-games-catching-fire"] > div { position: absolute; }
+
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-glow {
+  left: var(--bcx, 50%);
+  top: calc(var(--bcy, 40%) + var(--bh, 212px) / 2);
+  width: calc(var(--bw, 1100px) * 1.25);
+  height: 420px;
+  translate: -50% -42%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 122, 40, 0.34) 0, rgba(255, 122, 40, 0.1) 45%, rgba(255, 122, 40, 0) 70%);
+}
+
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-arena {
+  left: 50%;
+  top: 57%;
+  width: 134vw;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  transform: perspective(2600px) rotateX(52deg);
+  opacity: 0;
+  transition: opacity 0.9s ease 0.1s;
+}
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-arena { opacity: 1; }
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-arena i { position: absolute; inset: 0; border-radius: 50%; }
+/* вода, двенадцать спиц, остров с Рогом изобилия */
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-disc {
+  background:
+    radial-gradient(circle, rgba(190, 240, 255, 0.95) 0 1.1%, rgba(150, 228, 255, 0.35) 1.3% 2.6%, rgba(150, 228, 255, 0) 2.8%),
+    repeating-conic-gradient(from -0.3deg, rgba(150, 228, 255, 0.75) 0 0.6deg, rgba(150, 228, 255, 0) 0.6deg 30deg),
+    radial-gradient(circle, rgba(24, 92, 112, 0.5) 0, rgba(14, 58, 74, 0.34) 45%, rgba(8, 30, 40, 0.2) 69%);
+  -webkit-mask-image: radial-gradient(circle, #000 0 69.6%, transparent 69.8%);
+  mask-image: radial-gradient(circle, #000 0 69.6%, transparent 69.8%);
+}
+/* берег и кольцо джунглей */
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-rim {
+  background:
+    radial-gradient(circle, rgba(150, 228, 255, 0) 69.5%, rgba(170, 236, 255, 0.9) 69.8% 70.2%, rgba(150, 228, 255, 0) 70.5%),
+    radial-gradient(circle, rgba(150, 228, 255, 0) 70.4%, rgba(60, 150, 130, 0.16) 71% 96%, rgba(150, 228, 255, 0) 100%),
+    repeating-conic-gradient(from 14.7deg, rgba(150, 228, 255, 0.5) 0 0.6deg, rgba(150, 228, 255, 0) 0.6deg 30deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 69.4%, #000 69.6% 100%);
+  mask-image: radial-gradient(circle, transparent 0 69.4%, #000 69.6% 100%);
+}
+/* стрелка: сектор текущего часа */
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-hand {
+  background: conic-gradient(from -15deg, rgba(255, 150, 60, 0.7) 0 30deg, rgba(255, 150, 60, 0) 30deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 2.8%, #000 3% 69.6%, transparent 69.8%);
+  mask-image: radial-gradient(circle, transparent 0 2.8%, #000 3% 69.6%, transparent 69.8%);
+}
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-hand { animation: cf-tick 12s steps(12, end) infinite, cf-tock 1s ease-out infinite; }
+@keyframes cf-tick { to { rotate: 360deg; } }
+@keyframes cf-tock { 0% { opacity: 1; } 18% { opacity: 0.75; } 100% { opacity: 0.32; } }
+
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-sparks { inset: 0; overflow: hidden; opacity: 0.8; -webkit-mask-image: radial-gradient(70% 60% at var(--bcx, 50%) var(--bcy, 40%), #000 0, transparent 100%); mask-image: radial-gradient(70% 60% at var(--bcx, 50%) var(--bcy, 40%), #000 0, transparent 100%); }
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-sparks i { position: absolute; left: 0; top: 0; width: 100%; height: calc(100% + 900px); background: url(assets/sparks.webp) 0 0 / 900px 900px; }
+.stage-layer[data-title="the-hunger-games-catching-fire"] .cf-st-sparks i + i { background-size: 560px 560px; background-position: 210px 0; opacity: 0.6; height: calc(100% + 560px); }
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-sparks i { animation: cf-st-up 26s linear infinite; }
+.stage-layer[data-title="the-hunger-games-catching-fire"].on .cf-st-sparks i + i { animation: cf-st-up2 15s linear infinite; }
+@keyframes cf-st-up { to { transform: translate3d(0, -900px, 0); } }
+@keyframes cf-st-up2 { to { transform: translate3d(0, -560px, 0); } }
+
+/* -------------------------------------------------------------- заставка --- */
+/* Стена огня поднимается снизу и оставляет за собой уголь; на угле — эмблема фильма и название.
+   Потом уголь уходит вверх вслед за огнём и уносит их — под ним сцена. Слои живут и на главной: только свои
+   классы. Огонь — с настоящей прозрачностью: режим наложения сквозь слой заставки главную не видит. */
+
+.cf-cover { position: fixed; inset: 0; z-index: 90; overflow: hidden; pointer-events: none; }
+.cf-cv-mover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100%;
+  transform: translate3d(0, calc(100% + 560px), 0);
+  transition: transform 0.86s cubic-bezier(0.36, 0.3, 0.28, 1);
+  will-change: transform;
+}
+.cf-cover.closing .cf-cv-mover,
+.cf-cover.closed .cf-cv-mover { transform: translate3d(0, -44px, 0); }
+.cf-cover.closed .cf-cv-mover { transition: none; }
+.cf-cover.opening .cf-cv-mover { transform: translate3d(0, calc(-100% - 300px), 0); transition: transform 1s cubic-bezier(0.3, 0.2, 0.25, 1); }
+
+.cf-cv-body { position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 60px); overflow: hidden; background: #0b0807; }
+.cf-cv-edge { position: absolute; left: 0; right: 0; top: -170px; height: 171px; background: url(assets/burn.webp) 0 0 / auto 290px repeat-x; }
+/* основание огня — на линии стыка: его низ прячется за углём, просвета нет */
+.cf-cv-flames { position: absolute; left: 0; right: 0; top: -470px; height: 470px; background: url(assets/flames.webp) 37% 100% / auto 470px repeat-x; }
+.cf-cv-tail { position: absolute; left: 0; right: 0; top: calc(100% + 59px); height: 120px; background: url(assets/burn.webp) 0 -170px / auto 290px repeat-x; }
+
+/* эмблема: чёрное поле кадра уходит в уголь (screen), сама она — над названием и медленно приближается.
+   Положение посчитано под этот кадр: центр эмблемы — 59 % по ширине и 47 % по высоте. */
+.cf-cv-art {
+  --s: min(78vh, 128vw);
+  position: absolute;
+  left: calc(50% - var(--s) * 1.049);
+  top: calc(44px + 40vh - var(--s) * 0.47);
+  width: calc(var(--s) * 1.7778);
+  height: var(--s);
+  max-width: none;
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(closest-side at 59% 47%, #000 52%, transparent 98%);
+  mask-image: radial-gradient(closest-side at 59% 47%, #000 52%, transparent 98%);
+  transform-origin: 59% 47%;
+  opacity: 0;
+  transition: opacity 0.7s ease 0.42s, transform 3.6s cubic-bezier(0.2, 0.5, 0.3, 1) 0.3s;
+}
+.cf-cover:is(.closing, .lit) .cf-cv-art { opacity: 0.92; transform: scale(1.08); }
+.cf-cover.lit .cf-cv-art { transition-delay: 0s; }
+.cf-cover.opening .cf-cv-art { opacity: 0; transform: scale(1.08); transition: opacity 0.6s ease 0.08s; }
+
+.cf-cv-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(44px + 74vh);
+  display: grid;
+  justify-items: center;
+  padding: 0 20px;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease 0.5s, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.5s;
+}
+.cf-cv-title img { display: block; width: min(600px, 84vw); height: auto; filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.9)); }
+.cf-cv-title b { font: 400 clamp(22px, 3.4vw, 40px) / 1.15 var(--t-display, "Forum", serif); letter-spacing: 0.16em; text-transform: uppercase; text-align: center; color: #f3cf8a; }
+.cf-cv-title img + b { display: none; }
+.cf-cover:is(.closing, .lit) .cf-cv-title { opacity: 1; transform: none; }
+.cf-cover.lit .cf-cv-title { transition-delay: 0.12s; }
+.cf-cover.opening .cf-cv-title { opacity: 0; transform: none; transition: opacity 0.55s ease 0.08s; }
+
+/* -------------------------------------------------------------- страница --- */
+
+html[data-title="the-hunger-games-catching-fire"] {
+  --cf-char: #0b0807;
+  --cf-ember: #ff8a3c;
+  --cf-gold: #f3cf8a;
+  --cf-pearl: #f5ede3;
+  --cf-dim: rgba(245, 237, 227, 0.72);
+}
+html[data-title="the-hunger-games-catching-fire"] body { background: var(--cf-char); }
+
+.cf-show {
+  --pad: clamp(16px, 2.2vw, 30px);
+  --cf-top: 104px; /* над кадром — тёмные колосники: там название и сверка */
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto auto;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  color: var(--cf-pearl);
+  font-family: var(--t-body);
+}
+
+/* кадр сцены: «до» — спиной в белом платье, «после» — лицом в наряде сойки */
+.cf-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: var(--cf-char); }
+.cf-bg-a,
+.cf-bg-b {
+  position: absolute;
+  left: 0;
+  top: var(--cf-top);
+  width: 100%;
+  height: calc(100% - var(--cf-top));
+  max-width: none;
+  object-fit: cover;
+}
+.cf-bg-a { object-position: 48% 16%; }
+.cf-bg-b { object-position: 50% 22%; opacity: 0; transition: opacity 0.7s ease, filter 0.8s ease; }
+.cf-show.lit .cf-bg-b { opacity: 1; transition: filter 0.8s ease; }
+/* не вспыхнуло — и сцена остывает */
+.cf-show.lit.mid .cf-bg-b { filter: saturate(0.72) brightness(0.92); }
+.cf-show.lit.lo .cf-bg-b { filter: grayscale(0.88) brightness(0.74); }
+
+/* свет и тени поверх кадра: сверху — колосники, снизу — пол сцены под действие */
+.cf-bg-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, var(--cf-char) 0, var(--cf-char) var(--cf-top), rgba(11, 8, 7, 0.86) calc(var(--cf-top) + 26px), rgba(11, 8, 7, 0.5) calc(var(--cf-top) + 80px), rgba(11, 8, 7, 0) calc(var(--cf-top) + 190px)),
+    linear-gradient(0deg, rgba(11, 8, 7, 0.8) 0, rgba(11, 8, 7, 0.4) 10%, rgba(11, 8, 7, 0) 22%);
+}
+.cf-show.lit .cf-bg-shade {
+  background:
+    linear-gradient(180deg, var(--cf-char) 0, var(--cf-char) var(--cf-top), rgba(11, 8, 7, 0.86) calc(var(--cf-top) + 26px), rgba(11, 8, 7, 0.5) calc(var(--cf-top) + 80px), rgba(11, 8, 7, 0) calc(var(--cf-top) + 190px)),
+    linear-gradient(0deg, rgba(11, 8, 7, 0.97) 0, rgba(11, 8, 7, 0.9) 14%, rgba(11, 8, 7, 0.62) 30%, rgba(11, 8, 7, 0.2) 46%, rgba(11, 8, 7, 0) 58%);
+}
+
+/* тлеющий подол: кромка стоит у самого низа кадра — от неё и пойдёт огонь */
+.cf-hem {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -112px; /* строка стыка — на 8 px выше низа: 290 − 170 − 8 */
+  z-index: 1;
+  height: 290px;
+  background: url(assets/burn.webp) 0 0 / auto 290px repeat-x;
+  transition: opacity 0.5s ease;
+}
+.cf-show:is(.seen, .burning, .lit) .cf-hem { opacity: 0; transition: none; }
+
+/* искры над сценой — только когда платье уже сгорело и что-то вспыхнуло */
+.cf-bg-sparks { position: absolute; inset: 0; overflow: hidden; opacity: 0; transition: opacity 1.2s; -webkit-mask-image: radial-gradient(75% 70% at 50% 60%, #000 20%, transparent 100%); mask-image: radial-gradient(75% 70% at 50% 60%, #000 20%, transparent 100%); }
+.cf-bg-sparks::before { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: calc(100% + 900px); background: url(assets/sparks.webp) 0 0 / 900px 900px; animation: cf-st-up 34s linear infinite; }
+.cf-show.lit .cf-bg-sparks { opacity: 0.45; }
+.cf-show.lit.hi .cf-bg-sparks { opacity: 0.7; }
+.cf-show.lit:is(.mid, .lo) .cf-bg-sparks { opacity: 0; }
+
+/* огонь идёт от подола: окно с новым кадром, кромка, пламя — двигаются только transform-ами (см. burn() в theme.js) */
+.cf-burn { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.cf-burn-win { position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 220px); overflow: hidden; transform: translate3d(0, 200vh, 0); will-change: transform; }
+.cf-burn-win img { position: absolute; left: 0; width: 100%; max-width: none; object-fit: cover; object-position: 50% 22%; will-change: transform, scale; }
+.cf-burn-edge { position: absolute; left: 0; right: 0; top: -170px; height: 290px; background: url(assets/burn.webp) 0 0 / auto 290px repeat-x; transform: translate3d(0, 200vh, 0); will-change: transform; }
+/* основание огня — на линии стыка, его низ прячется за углём; два слоя разного роста */
+.cf-burn-flames { position: absolute; left: 0; right: 0; top: -520px; height: 520px; background: url(assets/flames.webp) 31% 100% / auto 520px repeat-x; transform: translate3d(0, 200vh, 0); will-change: transform; }
+.cf-burn-flames.b { top: -340px; height: 340px; background-size: auto 340px; background-position: 78% 100%; opacity: 0.8; }
+/* сполох вокруг фигуры, когда огонь проходит через неё */
+.cf-burn-burst {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: min(980px, 130vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background:
+    radial-gradient(closest-side, rgba(255, 190, 110, 0.5) 0, rgba(255, 130, 44, 0.22) 38%, rgba(255, 130, 44, 0) 72%),
+    url(assets/sparks.webp) center / 460px 460px;
+  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+  opacity: 0;
+}
+
+.cf-back {
+  position: absolute;
+  left: var(--pad);
+  top: 22px;
+  z-index: 2;
+  padding: 8px 2px 7px;
+  border-bottom: 1px solid rgba(243, 207, 138, 0.35);
+  color: var(--cf-gold);
+  font: 400 13px / 1 var(--t-display);
+  letter-spacing: 0.24em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s, border-color 0.2s;
+}
+.cf-back:is(:hover, :focus-visible) { color: #fff; border-color: var(--cf-ember); outline: none; }
+
+/* название — как надпись над сценой; под ним одна тихая надпись сверки: факты и ссылки на карточку фильма */
+.cf-marquee { grid-row: 1; justify-self: center; width: min(760px, 100%); padding: 22px 20px 0; text-align: center; }
+.cf-logo { display: block; width: min(480px, 76vw); height: auto; margin: 0 auto; filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.9)); transition: width 0.6s ease; }
+.cf-name { margin: 0; font: 400 clamp(24px, 3.4vw, 40px) / 1.12 var(--t-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cf-gold); text-wrap: balance; }
+.cf-logo + .cf-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.cf-facts,
+.cf-refs { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; margin: 0; font: 400 13px / 1.4 var(--t-display); letter-spacing: 0.22em; text-transform: uppercase; color: var(--cf-dim); text-shadow: 0 1px 8px #000; }
+.cf-facts { gap: 3px 0; margin-top: 10px; }
+/* точка — после слова, а не перед: при переносе строка не начинается с разделителя */
+.cf-facts > :not(:last-child)::after { content: "·"; margin: 0 0.75em 0 0.55em; color: var(--cf-ember); }
+.cf-refs { gap: 2px 16px; margin-top: 5px; font-size: 12px; }
+.cf-refs small { font: inherit; opacity: 0.8; }
+.cf-refs a { padding-bottom: 2px; border-bottom: 1px solid rgba(243, 207, 138, 0.4); color: var(--cf-pearl); text-decoration: none; transition: color 0.2s, border-color 0.2s; }
+.cf-refs a i { font-style: normal; color: var(--cf-gold); }
+.cf-refs a:is(:hover, :focus-visible) { color: #fff; border-color: var(--cf-ember); outline: none; }
+
+/* пол сцены: одно действие на экран, а после интервью — цифра в огне и следующий выход */
+.cf-floor { grid-row: 3; justify-self: center; width: min(760px, 100%); padding: 0 20px 26px; text-align: center; outline: none; }
+.cf-state { display: grid; justify-items: center; gap: 12px; transition: opacity 0.6s ease; }
+.cf-state.wait { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+.cf-line { margin: 0; font: 400 20px / 1.3 var(--t-display); letter-spacing: 0.06em; color: var(--cf-pearl); text-shadow: 0 1px 10px #000, 0 0 24px #000; }
+.cf-line.dim { max-width: 46ch; font: 400 15.5px / 1.4 var(--t-body); letter-spacing: 0; color: var(--cf-dim); }
+
+/* кнопка — бирка со срезанными углами. Форма — на псевдоэлементах (обводка и заливка), а не на самой кнопке:
+   clip-path на кнопке срезал бы и её свечение (filter применяется раньше clip-path). */
+.cf-btn {
+  --line: rgba(245, 237, 227, 0.4);
+  --fill: #0f0a08;
+  --tag: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  justify-items: center;
+  gap: 5px;
+  min-width: 270px;
+  padding: 15px 44px 14px;
+  border: 0;
+  background: none;
+  color: var(--cf-pearl, #f5ede3);
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 0.25s;
+}
+.cf-btn::before,
+.cf-btn::after { content: ""; position: absolute; z-index: -1; clip-path: var(--tag); }
+.cf-btn::before { inset: 0; background: var(--line); }
+.cf-btn::after { inset: 1.5px; background: var(--fill); }
+.cf-btn b { padding-left: 0.2em; font: 400 20px / 1.1 var(--t-display); letter-spacing: 0.2em; text-transform: uppercase; }
+.cf-btn small { font: 400 14px / 1.2 var(--t-body); color: rgba(245, 237, 227, 0.72); }
+.cf-btn.ember { --line: linear-gradient(180deg, #ffb066, #ff7a2a 60%, #c93c14); --fill: linear-gradient(180deg, #1d0f08, #0b0807 70%); filter: drop-shadow(0 0 14px rgba(255, 110, 30, 0.45)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6)); }
+.cf-btn.ember b { color: #ffd9a8; }
+.cf-btn.gold { --line: linear-gradient(180deg, #fbe6b4, #d9a856 60%, #8e6226); --fill: linear-gradient(180deg, #1b140c, #0b0807 75%); filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6)); }
+.cf-btn.gold b { color: #f3cf8a; }
+.cf-btn.line { min-width: 0; padding: 11px 30px 10px; --fill: rgba(11, 8, 7, 0.86); }
+.cf-btn.line b { font-size: 14px; letter-spacing: 0.18em; }
+.cf-btn:is(:hover, :focus-visible):not(:disabled) { outline: none; }
+.cf-btn.ember:is(:hover, :focus-visible):not(:disabled) { --fill: linear-gradient(180deg, #3a1a0a, #160b06 75%); filter: drop-shadow(0 0 22px rgba(255, 120, 36, 0.8)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6)); }
+.cf-btn.gold:is(:hover, :focus-visible):not(:disabled) { --fill: linear-gradient(180deg, #2c2011, #120d07 75%); filter: drop-shadow(0 0 14px rgba(243, 207, 138, 0.35)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6)); }
+.cf-btn.line:is(:hover, :focus-visible):not(:disabled) { --line: #f3cf8a; }
+.cf-btn:focus-visible { --line: #fff; }
+.cf-btn:focus-visible::after { inset: 2.5px; }
+.cf-btn:disabled { cursor: default; opacity: 0.38; filter: none; }
+
+.cf-link { padding: 4px 2px; border: 0; border-bottom: 1px solid rgba(245, 237, 227, 0.3); background: none; color: rgba(245, 237, 227, 0.72); cursor: pointer; font: 400 15px / 1.2 var(--t-body); text-shadow: 0 1px 8px #000; transition: color 0.2s, border-color 0.2s; }
+.cf-link:is(:hover, :focus-visible) { color: #fff; border-color: #ff8a3c; outline: none; }
+
+/* оценка: насколько вспыхнуло. Под цифрой — тёмное пятно пола, за ней — огонь по росту оценки */
+.cf-score { position: relative; isolation: isolate; display: grid; justify-items: center; gap: 0; padding: 0 30px; }
+.cf-score::after { content: ""; position: absolute; inset: -30px -60px -24px; z-index: -2; background: radial-gradient(closest-side, rgba(11, 8, 7, 0.82) 0, rgba(11, 8, 7, 0.6) 55%, rgba(11, 8, 7, 0) 100%); pointer-events: none; }
+.cf-score-kicker { padding-left: 0.3em; font: 400 17px / 1.2 var(--t-display); letter-spacing: 0.3em; text-transform: uppercase; color: var(--cf-gold); text-shadow: 0 1px 10px #000; }
+.cf-score-num { font-size: clamp(116px, 20vh, 184px); line-height: 0.92; margin: 2px 0 4px; }
+.cf-score-text { max-width: 44ch; font: 400 17px / 1.4 var(--t-body); color: rgba(245, 237, 227, 0.9); text-wrap: balance; text-shadow: 0 1px 8px #000; }
+.cf-score:is(.hi, .warm)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  z-index: -1;
+  width: min(760px, 110vw);
+  height: 330px;
+  translate: -50% 0;
+  background: url(assets/flames.webp) 43% 100% / auto 330px repeat-x;
+  /* растворяется во все стороны, в том числе вниз: прямой нижней границы у огня нет */
+  -webkit-mask-image: radial-gradient(50% 60% at 50% 66%, #000 34%, transparent 100%);
+  mask-image: radial-gradient(50% 60% at 50% 66%, #000 34%, transparent 100%);
+  opacity: 0.85;
+  transform-origin: 50% 100%;
+  animation: cf-flame-lick 1.9s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.cf-score.warm::before { height: 200px; background-size: auto 200px; opacity: 0.6; }
+.cf-show.judged .cf-logo { width: min(380px, 68vw); }
+
+/* следующий выход: после оценки — кнопкой под вердиктом, до неё — тихо в углу */
+.cf-btn.cf-next { min-width: 300px; margin-top: 6px; padding: 11px 44px 12px; gap: 3px; }
+.cf-btn.cf-next small { order: -1; font: 400 12px / 1.2 var(--t-display); letter-spacing: 0.26em; text-transform: uppercase; color: rgba(243, 207, 138, 0.85); }
+.cf-btn.cf-next b { font-size: 17px; letter-spacing: 0.1em; }
+.cf-btn.cf-next b::after { content: " →"; color: #ff8a3c; }
+.cf-foot { grid-row: 4; display: flex; justify-content: flex-end; padding: 0 var(--pad) 18px; }
+.cf-exit { display: grid; gap: 3px; color: var(--cf-pearl); text-align: right; text-decoration: none; text-shadow: 0 1px 8px #000; }
+.cf-exit small { font: 400 12px / 1.2 var(--t-display); letter-spacing: 0.24em; text-transform: uppercase; color: var(--cf-gold); }
+.cf-exit b { font: 400 20px / 1.15 var(--t-display); letter-spacing: 0.04em; }
+.cf-exit i { font: 400 14px / 1.2 var(--t-body); font-style: normal; color: var(--cf-dim); }
+.cf-exit.main { margin-top: 6px; text-align: center; }
+a.cf-exit b { border-bottom: 1px solid rgba(243, 207, 138, 0.4); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
+a.cf-exit b::after { content: " →"; color: var(--cf-ember); }
+a.cf-exit:is(:hover, :focus-visible) { outline: none; }
+a.cf-exit:is(:hover, :focus-visible) b { color: #fff; border-color: var(--cf-ember); }
+
+/* выход на сцену после заставки */
+@media (prefers-reduced-motion: no-preference) {
+  .cf-show:not(.cf-in) :is(.cf-back, .cf-marquee, .cf-floor, .cf-foot) { opacity: 0; }
+  .cf-show.cf-in .cf-back { animation: cf-fade 0.8s ease 0.3s both; }
+  .cf-show.cf-in .cf-marquee { animation: cf-drop 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both; }
+  .cf-show.cf-in .cf-floor { animation: cf-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s both; }
+  .cf-show.cf-in .cf-foot { animation: cf-fade 0.9s ease 0.7s both; }
+  .cf-state:not(.wait) > * { animation: cf-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .cf-hem { animation: cf-smolder 2.6s ease-in-out infinite alternate; }
+}
+@keyframes cf-fade { from { opacity: 0; } }
+@keyframes cf-drop { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes cf-rise { from { opacity: 0; transform: translateY(16px); } }
+@keyframes cf-smolder { from { filter: brightness(0.86); } to { filter: brightness(1.2); } }
+
+/* ----------------------------------------------------- интервью у Цезаря --- */
+/* Сцена шоу: наверху — кадр интервью почти в полную яркость, лица открыты; по кромке сцены — лампы, по одной
+   на вопрос; ниже, на перьях наряда, — реплика Цезаря и ответы строками. Выбранная строка загорается. */
+
+.cf-talk {
+  --cf-stage: 45vh;
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: auto;
+  background: #0b0807;
+  color: #f5ede3;
+  font-family: var(--t-body);
+}
+.cf-talk::backdrop { background: #0b0807; }
+.cf-talk::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(180deg, #0b0807 0, #0b0807 calc(var(--cf-stage) - 8vh), rgba(11, 8, 7, 0.78) calc(var(--cf-stage) + 12vh), rgba(11, 8, 7, 0.9) 100%),
+    url(assets/feathers.webp) center bottom / cover;
+  pointer-events: none;
+}
+.cf-t-stage { position: fixed; left: 0; right: 0; top: 0; height: var(--cf-stage); overflow: hidden; }
+.cf-t-stage img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 50% 25%; filter: brightness(0.94); }
+.cf-t-stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11, 8, 7, 0.3) 0, rgba(11, 8, 7, 0) 26%, rgba(11, 8, 7, 0) 58%, rgba(11, 8, 7, 0.72) 86%, #0b0807 100%); }
+.cf-t-x { position: fixed; right: 20px; top: 18px; z-index: 3; width: 42px; height: 42px; border: 1px solid rgba(245, 237, 227, 0.32); border-radius: 50%; background: rgba(11, 8, 7, 0.62); color: #f5ede3; cursor: pointer; font: 400 24px / 1 var(--t-body); transition: border-color 0.2s, color 0.2s; }
+.cf-t-x:is(:hover, :focus-visible) { border-color: #ff8a3c; color: #fff; outline: none; }
+
+.cf-t-in { position: relative; z-index: 2; display: grid; grid-template-rows: auto 1fr auto; gap: 14px; width: min(780px, 100%); min-height: 100%; margin: 0 auto; padding: calc(var(--cf-stage) - 30px) 26px 20px; }
+/* лампы по кромке сцены — дугой: крайние ниже средних */
+.cf-t-bulbs { display: flex; justify-content: center; align-items: flex-start; gap: clamp(8px, 1.6vw, 18px); height: 34px; }
+.cf-t-bulbs i { flex: none; width: 12px; height: 12px; border-radius: 50%; translate: 0 calc(var(--d) * var(--d) * 16px); background: #2e231a; box-shadow: inset 0 0 0 1px rgba(243, 207, 138, 0.4); transition: background 0.3s, box-shadow 0.3s; }
+.cf-t-bulbs i.done { background: #f3cf8a; box-shadow: 0 0 10px rgba(243, 207, 138, 0.9), 0 0 22px rgba(255, 150, 60, 0.45); }
+.cf-t-bulbs i.now { background: #fff; box-shadow: 0 0 0 4px rgba(255, 138, 60, 0.35), 0 0 18px #ff8a3c; }
+
+.cf-t-q { align-self: start; display: grid; gap: 16px; }
+.cf-t-q.swap { animation: cf-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.cf-t-who { margin: 0 0 -8px; font: 400 13px / 1.2 var(--t-display); letter-spacing: 0.32em; text-transform: uppercase; color: #f3cf8a; }
+.cf-t-text { margin: 0; font: 400 clamp(23px, 3vw, 32px) / 1.24 var(--t-display); letter-spacing: 0.01em; text-wrap: balance; outline: none; }
+.cf-t-hint { margin: -8px 0 0; font-size: 15px; color: rgba(245, 237, 227, 0.7); }
+/* ответы — строки с волосяными разделителями */
+.cf-opts { display: grid; border-top: 1px solid rgba(245, 237, 227, 0.16); }
+.cf-opt {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 12px;
+  padding: 13px 10px 13px 6px;
+  border: 0;
+  border-bottom: 1px solid rgba(245, 237, 227, 0.16);
+  background: none;
+  color: rgba(245, 237, 227, 0.86);
+  cursor: pointer;
+  font: 400 18px / 1.32 var(--t-body);
+  text-align: left;
+  transition: color 0.2s, background 0.25s, border-color 0.2s;
+}
+.cf-opt i { color: #f3cf8a; font: 400 19px / 1 var(--t-display); font-style: normal; text-align: center; transition: color 0.2s; }
+.cf-opt u { align-self: center; width: 18px; height: 18px; border: 1px solid rgba(245, 237, 227, 0.45); text-decoration: none; transition: background 0.2s, border-color 0.2s; }
+.cf-opt:is(:hover, :focus-visible) { color: #fff; border-bottom-color: rgba(243, 207, 138, 0.75); outline: none; }
+.cf-opt:focus-visible { background: rgba(243, 207, 138, 0.09); }
+.cf-opt:is([aria-checked="true"], [aria-pressed="true"]) { color: #fff; border-bottom-color: transparent; background: linear-gradient(90deg, rgba(255, 138, 60, 0.3), rgba(255, 138, 60, 0.08) 60%, rgba(255, 138, 60, 0)); }
+.cf-opt:is([aria-checked="true"], [aria-pressed="true"]) i { color: #ffd9a8; }
+/* выбранная строка загорается: под ней — тлеющая кромка */
+.cf-opts .cf-opt:is([aria-checked="true"], [aria-pressed="true"])::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -11px;
+  z-index: 1;
+  height: 22px;
+  background: url(assets/burn.webp) 0 -6px / auto 58px repeat-x;
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 55%, transparent 96%);
+  mask-image: linear-gradient(90deg, #000 0, #000 55%, transparent 96%);
+  pointer-events: none;
+}
+.cf-opt[aria-pressed="true"] u { border-color: #ff8a3c; background: #ff8a3c; box-shadow: inset 0 0 0 3px #0b0807; }
+.cf-scale { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 10px 0; }
+.cf-scale > span { font-size: 15.5px; color: rgba(245, 237, 227, 0.75); }
+.cf-scale .cf-opt { grid-template-columns: 1fr; justify-items: center; align-items: center; width: 56px; height: 56px; padding: 0; border: 1px solid rgba(243, 207, 138, 0.5); border-radius: 50%; background: rgba(11, 8, 7, 0.7); font: 400 22px / 1 var(--t-display); }
+.cf-scale .cf-opt:is(:hover, :focus-visible) { border-color: #f3cf8a; }
+.cf-scale .cf-opt[aria-checked="true"] { border-color: #ff8a3c; background: #ff8a3c; color: #0b0807; box-shadow: 0 0 18px rgba(255, 138, 60, 0.65); }
+.cf-t-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; }
+.cf-t-foot .cf-btn { min-width: 0; padding: 12px 36px 11px; }
+.cf-t-foot .cf-btn b { font-size: 16px; }
+.cf-t-foot [hidden] { display: block !important; visibility: hidden; }
+.cf-keys { font-size: 14px; color: rgba(245, 237, 227, 0.5); text-align: center; }
+
+/* оглашение: эмблема в темноте, под ней цифра; с боков поднимается огонь — настолько, насколько вспыхнуло.
+   Положение эмблемы посчитано под этот кадр (центр — 59 % по ширине, 47 % по высоте), как в заставке. */
+.cf-talk.reveal::before { background: radial-gradient(60% 50% at 50% 30%, #1a0d07 0, #0b0807 70%); }
+.cf-r-art { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+.cf-r-art img {
+  --s: min(60vh, 112vw);
+  position: absolute;
+  left: calc(50% - var(--s) * 1.049);
+  top: calc(29vh - var(--s) * 0.47);
+  width: calc(var(--s) * 1.7778);
+  height: var(--s);
+  max-width: none;
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(closest-side at 59% 47%, #000 52%, transparent 98%);
+  mask-image: radial-gradient(closest-side at 59% 47%, #000 52%, transparent 98%);
+  transform-origin: 59% 47%;
+  animation: cf-emblem 2.6s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+}
+.cf-talk.warm .cf-r-art img { filter: saturate(0.82) brightness(0.9); }
+.cf-talk.mid .cf-r-art img { filter: saturate(0.42) brightness(0.72); }
+.cf-talk.lo .cf-r-art img { filter: grayscale(1) brightness(0.55); }
+@keyframes cf-emblem { from { opacity: 0; transform: scale(0.94); } }
+
+.cf-r-fire {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(12vh + 52vh * var(--cf-heat, 0.5) * var(--cf-heat, 0.5));
+  background: url(assets/flames.webp) 30% 100% / auto 100% repeat-x;
+  /* огонь стоит по бокам — середина остаётся под цифру и слова */
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 16%, transparent 36%, transparent 64%, #000 84%, #000 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 16%, transparent 36%, transparent 64%, #000 84%, #000 100%);
+  opacity: calc(var(--cf-heat, 0.5) * 1.6 - 0.45);
+  transform-origin: 50% 100%;
+  animation: cf-fire-up 2.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.55s both, cf-flame-lick 1.8s ease-in-out 2.7s infinite alternate;
+  pointer-events: none;
+}
+.cf-r-fire.b { height: calc(8vh + 34vh * var(--cf-heat, 0.5) * var(--cf-heat, 0.5)); background-position: 82% 100%; opacity: calc(var(--cf-heat, 0.5) * 1.1 - 0.35); -webkit-mask-image: none; mask-image: none; animation-delay: 0.75s, 3s; }
+.cf-r-sparks { position: fixed; inset: 0; overflow: hidden; opacity: calc(var(--cf-heat, 0.5) * 1.1 - 0.3); -webkit-mask-image: linear-gradient(0deg, #000 0, rgba(0, 0, 0, 0.5) 45%, transparent 85%); mask-image: linear-gradient(0deg, #000 0, rgba(0, 0, 0, 0.5) 45%, transparent 85%); pointer-events: none; }
+.cf-r-sparks::before { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: calc(100% + 900px); background: url(assets/sparks.webp) 0 0 / 900px 900px; animation: cf-st-up 22s linear infinite; }
+.cf-talk:is(.mid, .lo) .cf-r-fire { display: none; }
+/* не вспыхнуло — сверху сыплется пепел */
+.cf-talk.lo .cf-r-sparks { opacity: 0.26; filter: grayscale(1) brightness(1.2); -webkit-mask-image: linear-gradient(180deg, #000 0, rgba(0, 0, 0, 0.6) 60%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, rgba(0, 0, 0, 0.6) 60%, transparent 100%); }
+.cf-talk.lo .cf-r-sparks::before { top: -900px; animation: cf-ash 30s linear infinite; }
+.cf-talk.mid .cf-r-sparks { opacity: 0.28; }
+@keyframes cf-fire-up { from { scale: 1 0.05; opacity: 0; } }
+@keyframes cf-ash { to { transform: translate3d(0, 900px, 0); } }
+
+.cf-r { position: relative; z-index: 2; display: grid; align-content: end; justify-items: center; gap: 4px; min-height: 100%; padding: 52vh 22px 5vh; text-align: center; }
+.cf-r-num { font-size: clamp(120px, 23vh, 210px); line-height: 0.9; animation: cf-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both; }
+.cf-r-label { margin: 2px 0 0; padding-left: 0.14em; font: 400 clamp(22px, 2.8vw, 32px) / 1.15 var(--t-display); letter-spacing: 0.14em; text-transform: uppercase; color: #f3cf8a; animation: cf-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1.9s both; }
+.cf-r-text { max-width: 30ch; margin: 2px 0 0; font: 400 18px / 1.4 var(--t-body); color: rgba(245, 237, 227, 0.9); text-wrap: balance; animation: cf-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 2.15s both; }
+.cf-r-foot { display: grid; justify-items: center; gap: 12px; margin-top: 16px; animation: cf-fade 0.8s ease 2.6s both; }
+.cf-r-foot .cf-btn { min-width: 0; padding: 12px 36px 11px; }
+.cf-r-foot .cf-btn b { font-size: 15px; }
+
+/* ------------------------------------------------------- узкие экраны --- */
+@media (max-width: 720px) {
+  .cf-show { --cf-top: 136px; }
+  .cf-back { top: 14px; font-size: 12px; }
+  .cf-marquee { padding-top: 54px; }
+  .cf-logo { width: min(320px, 84vw); }
+  .cf-show.judged .cf-logo { width: min(270px, 72vw); }
+  .cf-facts { font-size: 12px; letter-spacing: 0.14em; margin-top: 8px; }
+  /* оригинальное название — отдельной строкой, год и длительность — под ним */
+  .cf-facts > span:first-child { flex-basis: 100%; }
+  .cf-facts > span:first-child::after { content: none; }
+  .cf-refs { font-size: 11.5px; letter-spacing: 0.14em; }
+  .cf-bg-a { object-position: 47% 10%; }
+  .cf-bg-b { object-position: 50% 16%; }
+  .cf-floor { padding-bottom: 18px; }
+  .cf-btn { min-width: 236px; padding: 14px 34px 13px; }
+  .cf-btn b { font-size: 18px; letter-spacing: 0.16em; }
+  .cf-btn.cf-next { min-width: 0; max-width: 100%; padding: 10px 30px 11px; }
+  .cf-btn.cf-next b { font-size: 15px; letter-spacing: 0.06em; }
+  .cf-score-num { font-size: clamp(100px, 16vh, 140px); }
+  .cf-score-text { font-size: 15.5px; }
+  .cf-foot { justify-content: center; padding-bottom: 16px; }
+  .cf-exit { text-align: center; }
+  .cf-exit b { font-size: 17.5px; }
+
+  .cf-talk { --cf-stage: 31vh; }
+  .cf-t-stage img { object-position: 46% 20%; }
+  .cf-t-in { gap: 10px; padding: calc(var(--cf-stage) - 26px) 16px 14px; }
+  .cf-t-bulbs i { width: 10px; height: 10px; translate: 0 calc(var(--d) * var(--d) * 10px); }
+  .cf-t-who { font-size: 12px; letter-spacing: 0.24em; }
+  .cf-opt { padding: 11px 6px 11px 2px; gap: 10px; font-size: 16.5px; }
+  .cf-keys { display: none; }
+  /* шкала: кружки одной строкой, подписи краёв — под ними */
+  .cf-scale { gap: 10px 8px; }
+  .cf-scale .cf-opt { order: 0; width: 50px; height: 50px; }
+  .cf-scale > span { order: 1; flex: 1 0 40%; }
+  .cf-scale > span:last-child { text-align: right; }
+  .cf-r-art img { --s: min(44vh, 118vw); top: calc(24vh - var(--s) * 0.47); }
+  .cf-r { padding: 44vh 18px 4vh; }
+  .cf-r-num { font-size: clamp(104px, 18vh, 150px); }
+  .cf-r-text { font-size: 16.5px; }
+  .cf-r-fire { -webkit-mask-image: linear-gradient(90deg, #000 0, #000 8%, transparent 30%, transparent 70%, #000 92%, #000 100%); mask-image: linear-gradient(90deg, #000 0, #000 8%, transparent 30%, transparent 70%, #000 92%, #000 100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tbanner[data-title="the-hunger-games-catching-fire"] *,
+  .tbanner[data-title="the-hunger-games-catching-fire"] *::before,
+  .stage-layer[data-title="the-hunger-games-catching-fire"] *,
+  .cf-show *,
+  .cf-show *::before,
+  .cf-talk *,
+  .cf-talk *::before { animation: none !important; transition: none !important; }
+}

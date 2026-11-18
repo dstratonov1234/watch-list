@@ -1,6 +1,6 @@
 {
   "updated": "2026-11-18",
-  "build": "255e00272c",
+  "build": "3b2786f5ed",
   "sync": {
     "repo": "dstratonov1234/watch-list",
     "branch": "state",
@@ -141,6 +141,73 @@
         "headingSpacing": "0.16em",
         "radius": 0,
         "heroPosition": "center 37%",
+        "css": true,
+        "js": true
+      },
+      "quiz": true
+    },
+    {
+      "id": "the-hunger-games-catching-fire",
+      "title": "Голодные игры: И вспыхнет пламя",
+      "original": "The Hunger Games: Catching Fire",
+      "aliases": [
+        "И вспыхнет пламя",
+        "Catching Fire",
+        "Голодные игры 2",
+        "Голодные игры: И вспыхнет пламя (2013)"
+      ],
+      "type": "film",
+      "added": "2026-11-18",
+      "year": 2013,
+      "runtime": 146,
+      "links": [
+        {
+          "label": "Кинопоиск",
+          "url": "https://www.kinopoisk.ru/film/602373/"
+        },
+        {
+          "label": "Википедия",
+          "url": "https://ru.wikipedia.org/wiki/Голодные_игры:_И_вспыхнет_пламя"
+        }
+      ],
+      "cover": "https://image.tmdb.org/t/p/w780/lKe3uEQKyc6uTAOlFt9KmxHs5eH.jpg",
+      "hero": "https://image.tmdb.org/t/p/w1280/eHaazLxM5LRMh0ySkVy7SK6wUWt.jpg",
+      "logo": "https://image.tmdb.org/t/p/original/6pF4gbC7A4IpJlPoJVdxROSYgcb.png",
+      "images": {
+        "white": "https://image.tmdb.org/t/p/original/rjnSP5sasWEckrV3i3NoWOgeZTy.jpg",
+        "front": "https://image.tmdb.org/t/p/original/iUqQz6sxWjBDSlDloD8RJJ3yr4Z.jpg",
+        "bride": "https://image.tmdb.org/t/p/w1280/lfH4I6lKt0m1SPQ0HpJCsj7z8Fk.jpg",
+        "mockingjay": "https://image.tmdb.org/t/p/w1280/iUqQz6sxWjBDSlDloD8RJJ3yr4Z.jpg",
+        "interview": "https://image.tmdb.org/t/p/w1280/60gVoWZJB0epsmSStkT2sI97Ies.jpg",
+        "emblem": "https://image.tmdb.org/t/p/w1280/tPQkMOMdbQnyt0m5uy6CKg0M1Fa.jpg"
+      },
+      "parts": [
+        {
+          "id": "film",
+          "title": "Фильм",
+          "unit": "film",
+          "count": 1
+        }
+      ],
+      "theme": {
+        "bg": "#0b0807",
+        "surface": "#19110c",
+        "text": "#f5ede3",
+        "accent": "#ff8a3c",
+        "accent2": "#f3cf8a",
+        "fonts": [
+          "Forum",
+          "Alegreya Sans:wght@400;500;700"
+        ],
+        "displayFont": "Forum",
+        "headingFont": "Forum",
+        "bodyFont": "Alegreya Sans",
+        "bodySize": 17,
+        "headingWeight": 400,
+        "headingCase": "uppercase",
+        "headingSpacing": "0.14em",
+        "radius": 0,
+        "heroPosition": "center 30%",
         "css": true,
         "js": true
       },

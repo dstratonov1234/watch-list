@@ -1,0 +1,42 @@
+{
+  "model": "gpt-image-2.5-flare",
+  "notes": "burn.webp — не из модели: рваная обугленная кромка с тлеющим краем делается скриптом themes/the-hunger-games-catching-fire/burn.py (шум, порог, свечение), бесшовная по горизонтали. Тот же скрипт доводит flames.webp и sparks.webp: убирает чёрный фон (яркость → прозрачность), а огонь склеивает с его зеркальной копией в бесшовную полосу 2048 px — после перегенерации flames или sparks запустить его снова.",
+  "assets": [
+    {
+      "name": "flames",
+      "size": "1536x1024",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 1536,
+      "trim": false,
+      "prompt": "A wide photograph of real fire against a pure black background, seen at eye level: a wild, uneven line of flames along the bottom edge — a few tall twisting tongues, several low ones, glowing embers and dark gaps between them, clearly irregular, not a neat row. Deep amber, dark orange and red, with bright yellow only in the hottest cores; thin wisps of dark smoke and a few drifting sparks above the flames. The upper 40 percent of the frame is pure black. Cinematic and moody, like a film still, high contrast. No objects, no ground, no logs, no text, no letters, no people."
+    },
+    {
+      "name": "sparks",
+      "size": "1024x1024",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 900,
+      "trim": false,
+      "prompt": "Hundreds of tiny glowing embers and sparks floating in the air against a pure black background, scattered evenly across the whole frame from top to bottom with the same density everywhere, many different sizes, most of them small points, a few short motion-blurred streaks, warm orange and gold. Photorealistic, high contrast. No flames, no smoke, no objects, no text, no letters, no people."
+    },
+    {
+      "name": "lace",
+      "size": "1536x1024",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 1400,
+      "trim": false,
+      "prompt": "Macro photograph of ivory-white haute couture bridal fabric filling the whole frame edge to edge: layered organza ruffles and feather-like petals, rows of small pearls and fine silver thread embroidery, lit by a soft cold spotlight from above with gentle grey-blue shadows in the folds. Elegant, luxurious, calm. Wide composition, evenly detailed, no empty areas. No people, no hands, no mannequin, no text, no letters."
+    },
+    {
+      "name": "feathers",
+      "size": "1536x1024",
+      "background": "opaque",
+      "quality": "medium",
+      "max_width": 1400,
+      "trim": false,
+      "prompt": "Macro photograph of overlapping black bird feathers filling the whole frame edge to edge, layered like the surface of a spread wing, with a deep blue and charcoal iridescent sheen; the tips of a few feathers glow with tiny orange embers as if freshly singed. Dark, dramatic, low-key lighting, very dark overall. Wide composition, evenly detailed. No bird head, no eyes, no people, no text, no letters."
+    }
+  ]
+}

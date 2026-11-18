@@ -555,8 +555,9 @@
       onChange: (fn) => modules.changeFns.push(fn),
       // соседние тайтлы по порядку списка: { id, title, href } или null — для своей навигации темы
       neighbors: neighborsOf(t),
-      // место тайтла в серии (сезоны, фильмы по порядку просмотра): { id, title, index, total, prev, next } или null;
-      // prev/next — { title, href, added, released, status }: href есть, только если эта часть уже добавлена на сайт
+      // соседи тайтла по серии (сезоны, фильмы по порядку просмотра): { id, title, prev, next } или null;
+      // prev/next — { title, href, added, released, status }: href есть, только если эта часть уже добавлена на сайт.
+      // Номера части и числа частей нет нарочно — место в серии на сайте не показывается
       chain: () => chainOf(t),
       // сверка «то ли я смотрю»: { original, year, length, facts: [...], links: [{ label, href }] } — показать в образе
       // тайтла; ссылки ведут на карточку этой части в базах — открывать в новой вкладке
