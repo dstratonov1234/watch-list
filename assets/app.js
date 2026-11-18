@@ -996,7 +996,8 @@
           status: other ? progressOf(other).status : null,
         };
       };
-      return { id: fid, title: f.title ?? "", index: i + 1, total: list.length, prev: pick(list[i - 1]), next: pick(list[i + 1]) };
+      // Номера части и числа частей здесь нет нарочно: «фильм 1 из 6» на сайте не показывается, каждый тайтл сам по себе.
+      return { id: fid, title: f.title ?? "", prev: pick(list[i - 1]), next: pick(list[i + 1]) };
     }
     return null;
   }

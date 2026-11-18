@@ -138,7 +138,6 @@
 .tbanner[data-title="the-hunger-games"] .hg-b-title { font: 300 clamp(24px, 3vw, 38px) / 1 var(--t-display); letter-spacing: 0.2em; text-transform: uppercase; }
 /* логотип уже несёт название — текст остаётся только для чтения с экрана (и на случай, если логотип не загрузится) */
 .tbanner[data-title="the-hunger-games"] .hg-b-logo + .hg-b-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.tbanner[data-title="the-hunger-games"] .hg-b-part { font: 500 11.5px/1.2 var(--t-body); letter-spacing: 0.3em; text-transform: uppercase; color: var(--hg-holo); }
 
 /* балл распорядителей: большая цифра там, куда смотрит стрела, — как балл трибута в эфире */
 .tbanner[data-title="the-hunger-games"] .hg-b-score {
@@ -425,9 +424,8 @@ html[data-title="the-hunger-games"] body { background: var(--hg-night); }
   outline: none;
 }
 
-/* строка над названием: место в серии и сверка — оригинальное название, год, длительность */
+/* строка над названием — сверка: оригинальное название, год, длительность (места в серии здесь нет) */
 .hg-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 0; margin: 0; font: 500 11.5px/1.4 var(--t-body); letter-spacing: 0.26em; text-transform: uppercase; color: color-mix(in srgb, var(--hg-ice) 82%, transparent); }
-.hg-kicker b { font-weight: 600; letter-spacing: 0.4em; color: var(--hg-holo); }
 /* точка — после слова, а не перед: при переносе строка не начинается с разделителя */
 .hg-kicker > :not(:last-child)::after { content: "·"; margin: 0 0.7em 0 0.5em; color: var(--hg-holo); opacity: 0.7; }
 /* ссылки на карточку фильма — тихой строкой под действием */
@@ -800,7 +798,6 @@ a.hg-tick:focus-visible { box-shadow: inset 0 -3px 0 var(--hg-gold); }
 @media (max-width: 620px) {
   .hg-bug { font-size: 10.5px; letter-spacing: 0.2em; }
   .hg-kicker { font-size: 11px; letter-spacing: 0.16em; }
-  .hg-kicker b { letter-spacing: 0.26em; }
   .hg-refs { gap: 0 14px; letter-spacing: 0.14em; }
   .hg-bug i { width: 36px; height: 36px; }
   .hg-line { font-size: 16px; }
