@@ -39,8 +39,31 @@
       },
       "wt": 1794989264675,
       "last": "film",
-      "q": null,
-      "qt": 0
+      "q": {
+        "a": {
+          "after": "b",
+          "arena": "c",
+          "camera": "b",
+          "capitol": "d",
+          "finale": "b",
+          "foes": "c",
+          "idea": "b",
+          "katniss": "b",
+          "moments": [
+            "reaping",
+            "salute",
+            "thresh",
+            "seneca"
+          ],
+          "music": "c",
+          "next": "a",
+          "peeta": "a",
+          "road": "a",
+          "rue": "a"
+        },
+        "s": 7.6
+      },
+      "qt": 1794989489483
     }
   }
 }
